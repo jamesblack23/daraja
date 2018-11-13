@@ -1,3 +1,8 @@
+import {
+  DarajaConfigurationError,
+  OVERRIDE_PASSKEY_ERROR_MESSAGE
+} from './errors';
+
 /**
  *
  *
@@ -5,6 +10,7 @@
  * @class DarajaBuilder
  */
 export class DarajaBuilder {
+  public LNMPasskey: string = '';
   /**
    * Creates an instance of DarajaBuilder.
    * @param {number} shortcode - This is the organization's shortcode
@@ -17,4 +23,18 @@ export class DarajaBuilder {
     public consumerKey: string,
     public consumerSecret: string
   ) {}
+
+  /**
+   *
+   *
+   * @param {string} LNMPasskey - The Lipa na M-Pesa Online Passkey
+   * @returns {DarajaBuilder}
+   */
+  public addLNMPasskey(LNMPasskey: string): DarajaBuilder {
+    if (this.LNMPasskey.length > 0) {
+      throw new DarajaConfigurationError(OVERRIDE_PASSKEY_ERROR_MESSAGE);
+    }
+    this.LNMPasskey = LNMPasskey;
+    return this;
+  }
 }
