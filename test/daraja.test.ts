@@ -1,5 +1,5 @@
 import { assert } from 'chai';
-import DarajaBuilder from '../src';
+import { DarajaBuilder } from '../src';
 
 describe('DarajaBuilder', () => {
   let builder: DarajaBuilder;
