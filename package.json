@@ -4,7 +4,8 @@
   "description": "A NodeJS library",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha -r ts-node/register test/**/*.test.ts",
+    "build": "tsc"
   },
   "repository": {
     "type": "git",
@@ -22,6 +23,13 @@
   },
   "homepage": "https://github.com/austinewuncler/daraja#readme",
   "devDependencies": {
+    "@types/chai": "^4.1.7",
+    "@types/mocha": "^5.2.5",
+    "@types/node": "^10.12.6",
+    "chai": "^4.2.0",
+    "mocha": "^5.2.0",
+    "ts-node": "^7.0.1",
+    "tslint": "^5.11.0",
     "typescript": "^3.1.6"
   }
 }
