@@ -1,6 +1,7 @@
 import {
   DarajaConfigurationError,
-  OVERRIDE_PASSKEY_ERROR_MESSAGE
+  OVERRIDE_LNM_CALLBACKURL_ERROR_MESSAGE,
+  OVERRIDE_LNM_PASSKEY_ERROR_MESSAGE
 } from './errors';
 
 /**
@@ -10,7 +11,9 @@ import {
  * @class DarajaBuilder
  */
 export class DarajaBuilder {
-  public LNMPasskey: string = '';
+  public LNMPasskey: string;
+  public LNMCallbackURL: string;
+
   /**
    * Creates an instance of DarajaBuilder.
    * @param {number} shortcode - This is the organization's shortcode
@@ -22,7 +25,10 @@ export class DarajaBuilder {
     public shortcode: number,
     public consumerKey: string,
     public consumerSecret: string
-  ) {}
+  ) {
+    this.LNMPasskey = '';
+    this.LNMCallbackURL = '';
+  }
 
   /**
    *
@@ -32,9 +38,26 @@ export class DarajaBuilder {
    */
   public addLNMPasskey(LNMPasskey: string): DarajaBuilder {
     if (this.LNMPasskey.length > 0) {
-      throw new DarajaConfigurationError(OVERRIDE_PASSKEY_ERROR_MESSAGE);
+      throw new DarajaConfigurationError(OVERRIDE_LNM_PASSKEY_ERROR_MESSAGE);
     }
     this.LNMPasskey = LNMPasskey;
+    return this;
+  }
+
+  /**
+   *
+   *
+   * @param {string} LNMCallbackURL - A valid secure URL that is used to receive notifications from M-Pesa API.
+   * It is the endpoint to which the results will be sent by M-Pesa API.
+   * @returns {DarajaBuilder}
+   */
+  public addLNMCallbackURL(LNMCallbackURL: string): DarajaBuilder {
+    if (this.LNMCallbackURL.length > 0) {
+      throw new DarajaConfigurationError(
+        OVERRIDE_LNM_CALLBACKURL_ERROR_MESSAGE
+      );
+    }
+    this.LNMCallbackURL = LNMCallbackURL;
     return this;
   }
 }

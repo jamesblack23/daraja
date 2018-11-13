@@ -2,7 +2,8 @@ import { assert } from 'chai';
 import { DarajaBuilder } from '../src';
 import {
   DarajaConfigurationError,
-  OVERRIDE_PASSKEY_ERROR_MESSAGE
+  OVERRIDE_LNM_CALLBACKURL_ERROR_MESSAGE,
+  OVERRIDE_LNM_PASSKEY_ERROR_MESSAGE
 } from '../src/errors';
 
 describe('DarajaBuilder', () => {
@@ -36,26 +37,51 @@ describe('DarajaBuilder', () => {
   });
 
   describe('addLNMPasskey()', () => {
-    let builderLNM: DarajaBuilder;
+    let builderLNMPasskey: DarajaBuilder;
 
     beforeEach(() => {
-      builderLNM = builder.addLNMPasskey('passkey');
+      builderLNMPasskey = builder.addLNMPasskey('passkey');
     });
 
-    it('should set the Passkey property', () => {
+    it('should set the LNMPasskey property', () => {
       assert.propertyVal(
-        builderLNM,
+        builderLNMPasskey,
         'LNMPasskey',
         'passkey',
-        'passkey value not set'
+        'LNMPasskey value not set'
       );
     });
 
-    it('should throw a DarajaConfigurationError when attempting to override previously set passkey', () => {
+    it('should throw a DarajaConfigurationError when attempting to override previously set LNMPasskey', () => {
       assert.throws(
-        () => builderLNM.addLNMPasskey('other'),
+        () => builderLNMPasskey.addLNMPasskey('other'),
         DarajaConfigurationError,
-        OVERRIDE_PASSKEY_ERROR_MESSAGE
+        OVERRIDE_LNM_PASSKEY_ERROR_MESSAGE
+      );
+    });
+  });
+
+  describe('addLNMCallbackURL()', () => {
+    let builderLNMCallbackURL: DarajaBuilder;
+
+    beforeEach(() => {
+      builderLNMCallbackURL = builder.addLNMCallbackURL('myurl');
+    });
+
+    it('should set the LNMCallbackURL property', () => {
+      assert.propertyVal(
+        builderLNMCallbackURL,
+        'LNMCallbackURL',
+        'myurl',
+        'LNMCallbackURL value not set'
+      );
+    });
+
+    it('should throw a DarajaConfigurationError when attempting to override previously set LNMCallbackURL', () => {
+      assert.throws(
+        () => builderLNMCallbackURL.addLNMCallbackURL('otherurl'),
+        DarajaConfigurationError,
+        OVERRIDE_LNM_CALLBACKURL_ERROR_MESSAGE
       );
     });
   });
