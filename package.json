@@ -1,0 +1,27 @@
+{
+  "name": "daraja",
+  "version": "1.0.0",
+  "description": "A NodeJS library",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/austinewuncler/daraja.git"
+  },
+  "keywords": [
+    "safaricom",
+    "mpesa",
+    "daraja"
+  ],
+  "author": "Austine Were",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/austinewuncler/daraja/issues"
+  },
+  "homepage": "https://github.com/austinewuncler/daraja#readme",
+  "devDependencies": {
+    "typescript": "^3.1.6"
+  }
+}
