@@ -1,3 +1,5 @@
+import { Daraja } from './daraja';
+import { IDarajaConfig } from './daraja-config.interface';
 import {
   DarajaConfigurationError,
   OVERRIDE_LNM_CALLBACKURL_ERROR_MESSAGE,
@@ -59,5 +61,23 @@ export class DarajaBuilder {
     }
     this.LNMCallbackURL = LNMCallbackURL;
     return this;
+  }
+
+  public build(): Daraja {
+    const config: Partial<IDarajaConfig> = {};
+
+    if (this.LNMCallbackURL) {
+      config.LNMCallbackURL = this.LNMCallbackURL;
+    }
+    if (this.LNMPasskey) {
+      config.LNMPasskey = this.LNMPasskey;
+    }
+
+    return Daraja.getInstance(
+      this.shortcode,
+      this.consumerKey,
+      this.consumerSecret,
+      config
+    );
   }
 }

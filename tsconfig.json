@@ -9,15 +9,9 @@
     /* Strict Type-Checking Options */
     "strict": true,
 
-    /* Additional Checks */
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
-
     /* Module Resolution Options */
     "moduleResolution": "node"
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "test/daraja-builder.test.ts"],
   "exclude": ["test/**/*.test.ts"]
 }
