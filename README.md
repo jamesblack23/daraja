@@ -1,5 +1,7 @@
 # daraja
 
+[![Build Status](https://travis-ci.com/austinewuncler/daraja.svg?branch=master)](https://travis-ci.com/austinewuncler/daraja)
+
 A NodeJS library to interact with Safaricom's Daraja M-Pesa API
 
 ## Installation
