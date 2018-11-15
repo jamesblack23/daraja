@@ -5,7 +5,8 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "test": "mocha -r ts-node/register test/**/*.test.ts",
+    "test": " nyc --reporter=html --reporter=text mocha -r ts-node/register test/**/*.test.ts",
+    "coverage": "nyc report --reporter=text-lcov | coveralls",
     "build": "tsc",
     "prepare": "npm run build",
     "prepublishOnly": "npm test",
@@ -40,6 +41,7 @@
     "dotenv": "^6.1.0",
     "istanbul": "^0.4.5",
     "mocha": "^5.2.0",
+    "nyc": "^13.1.0",
     "ts-node": "^7.0.1",
     "tslint": "^5.11.0",
     "typescript": "^3.1.6"
