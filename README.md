@@ -15,7 +15,7 @@ Import the DarajaBuilder class as follows:
 ### JavaScript
 
 ```javascript
-const {DarajaBuilder} = require('daraja);
+const { DarajaBuilder } = require('daraja');
 ```
 
 ### TypeScript
