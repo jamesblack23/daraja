@@ -1,11 +1,14 @@
 {
   "name": "daraja",
   "version": "0.0.1",
-  "description": "A NodeJS library",
-  "main": "index.js",
+  "description": "A NodeJS library to interact with Safaricom's Daraja M-Pesa API",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "test": "mocha -r ts-node/register test/**/*.test.ts",
-    "build": "tsc"
+    "build": "tsc",
+    "prepare": "npm run build",
+    "prepublishOnly": "npm test"
   },
   "repository": {
     "type": "git",
