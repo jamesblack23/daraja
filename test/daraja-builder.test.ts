@@ -13,29 +13,6 @@ describe('DarajaBuilder', () => {
     builder = new DarajaBuilder(12345, 'key', 'secret');
   });
 
-  describe('constructor', () => {
-    it('should set the respective properties', () => {
-      assert.propertyVal(
-        builder,
-        'shortcode',
-        12345,
-        'shortcode value not set'
-      );
-      assert.propertyVal(
-        builder,
-        'consumerKey',
-        'key',
-        'consumerKey value not set'
-      );
-      assert.propertyVal(
-        builder,
-        'consumerSecret',
-        'secret',
-        'consumerSecret value not set'
-      );
-    });
-  });
-
   describe('addLNMPasskey()', () => {
     let builderLNMPasskey: DarajaBuilder;
 
@@ -55,7 +32,6 @@ describe('DarajaBuilder', () => {
     it('should throw a DarajaConfigurationError when attempting to override previously set LNMPasskey', () => {
       assert.throws(
         () => builderLNMPasskey.addLNMPasskey('other'),
-        DarajaConfigurationError,
         OVERRIDE_LNM_PASSKEY_ERROR_MESSAGE
       );
     });
@@ -80,7 +56,6 @@ describe('DarajaBuilder', () => {
     it('should throw a DarajaConfigurationError when attempting to override previously set LNMCallbackURL', () => {
       assert.throws(
         () => builderLNMCallbackURL.addLNMCallbackURL('otherurl'),
-        DarajaConfigurationError,
         OVERRIDE_LNM_CALLBACKURL_ERROR_MESSAGE
       );
     });
