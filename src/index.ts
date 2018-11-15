@@ -13,8 +13,8 @@ import {
  * @class DarajaBuilder
  */
 export class DarajaBuilder {
-  public LNMPasskey: string;
-  public LNMCallbackURL: string;
+  private LNMPasskey: string;
+  private LNMCallbackURL: string;
 
   /**
    * Creates an instance of DarajaBuilder.
@@ -24,9 +24,9 @@ export class DarajaBuilder {
    * @param {string} consumerSecret - Your App's Consumer Secret (obtain from Developer's portal)
    */
   constructor(
-    public shortcode: number,
-    public consumerKey: string,
-    public consumerSecret: string
+    private shortcode: number,
+    private consumerKey: string,
+    private consumerSecret: string
   ) {
     this.LNMPasskey = '';
     this.LNMCallbackURL = '';

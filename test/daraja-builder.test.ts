@@ -1,6 +1,5 @@
 import { assert } from 'chai';
 import { DarajaBuilder } from '../src';
-import { Daraja } from '../src/daraja';
 import {
   DarajaConfigurationError,
   OVERRIDE_LNM_CALLBACKURL_ERROR_MESSAGE,
@@ -84,18 +83,6 @@ describe('DarajaBuilder', () => {
         DarajaConfigurationError,
         OVERRIDE_LNM_CALLBACKURL_ERROR_MESSAGE
       );
-    });
-  });
-
-  describe('build()', () => {
-    let daraja: Daraja;
-
-    beforeEach(() => {
-      daraja = builder.build();
-    });
-
-    it('should create an instance of Daraja', () => {
-      assert.instanceOf(daraja, Daraja, 'does not create a Daraja instance');
     });
   });
 });
