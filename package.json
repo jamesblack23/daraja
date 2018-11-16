@@ -9,7 +9,6 @@
     "coverage": "nyc report --reporter=text-lcov | coveralls",
     "build": "tsc",
     "prepare": "npm run build",
-    "prepublishOnly": "npm test",
     "version": "git add -A src",
     "postversion": "git push && git push --tags"
   },
