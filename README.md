@@ -20,9 +20,9 @@ Verify NodeJS and npm installation by
 
 ```sh
 $ node -v
-#v10.13.0
+v10.13.0
 $ npm -v
-#6.4.1
+6.4.1
 ```
 
 Then install the library in your project directory
