@@ -29,7 +29,7 @@ suite('Daraja', function() {
 
   suite('lipaNaMpesa()', () => {
     test('should return successful response', async () => {
-      assert.eventually.exists(
+      return assert.eventually.exists(
         darajaLNM.lipaNaMpesa(
           1,
           LNMMSISDN,
