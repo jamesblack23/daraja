@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "test": " nyc --reporter=html --reporter=text mocha -r ts-node/register test/**/*.test.ts",
+    "test": " nyc --reporter=html --reporter=text mocha --ui tdd -r ts-node/register test/**/*.test.ts",
     "coverage": "nyc report --reporter=text-lcov | coveralls",
     "build": "tsc",
     "prepare": "npm run build",

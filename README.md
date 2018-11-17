@@ -99,10 +99,35 @@ Finally call the API using the various methods provided on the `Daraja` instance
   - `AccountReference` - `string` - This is an alphanumeric parameter that is defined by your system as an identifier of the transaction for _CustomerPayBillOnline_ transaction type.
   - `TransactionDesc` - `string` - This is any additional information/comment that can be sent along with the request from your system. Maximum of 13 characters.
 
-  Returns a `Promise` which resolves to a successful message
+  Returns a `Promise` which resolves to a successful response from M-Pesa
 
   ```javascript
-  'Success. Request accepted for processing';
+  {
+    MerchantRequestID: "16813-1590513-1",
+    CheckoutRequestID: "ws_CO_DMZ_12321_23423476",
+    ResponseCode: "0",
+    ResponseDescription: "Success. Request accepted for processing",
+    CustomerMessage: "Success. Request accepted for processing"
+  }
+  ```
+
+  upon success, and throws `MPesaError` when the call fails
+
+- Lipa Na M-Pesa Online Query- `lipaNaMPesaQuery(CheckoutRequestID)`
+
+  - `CheckoutRequestID` - `string` - This is a global unique identifier of the processed checkout transaction request.
+
+  Returns a `Promise` which resolves to a successful response from M-Pesa
+
+  ```javascript
+  {
+    ResponseCode: "0",
+    ResponseDescription: "The service request has been accepted successsfully",
+    MerchantRequestID: "16813-1590513-1",
+    CheckoutRequestID: "ws_CO_DMZ_123212312_2342347678234",
+    ResultCode: "0",
+    ResultDesc: "The service request is processed successfully."
+  }
   ```
 
   upon success, and throws `MPesaError` when the call fails

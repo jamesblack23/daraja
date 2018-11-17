@@ -16,7 +16,7 @@ const LNMPasskey = process.env.LNM_PASSKEY || 'passkey';
 const LNMCallback = process.env.LNM_CALLBACK || 'lnmcallback';
 const LNMMSISDN = parseInt(process.env.LNM_MSISDN || '123', 10);
 
-describe('Daraja', function() {
+suite('Daraja', function() {
   this.timeout(0);
   let darajaLNM: Daraja;
 
@@ -27,17 +27,16 @@ describe('Daraja', function() {
       .build();
   });
 
-  describe('lipaNaMpesa()', () => {
-    it('should return successful response', () => {
-      return assert.eventually.equal(
+  suite('lipaNaMpesa()', () => {
+    test('should return successful response', async () => {
+      assert.eventually.exists(
         darajaLNM.lipaNaMpesa(
           1,
           LNMMSISDN,
           LNMShortcode,
           'AccountRef',
-          'TransDesc'
-        ),
-        'Success. Request accepted for processing'
+          'TransactionDesc'
+        )
       );
     });
   });

@@ -1,6 +1,10 @@
 import * as request from 'request-promise-native';
 import { IDarajaConfig } from './daraja-config.interface';
 import {
+  ILNMQueryResponse,
+  ILNMSuccessResponse
+} from './daraja-response.interface';
+import {
   DarajaConfigurationError,
   MPesaError,
   NO_LNM_CALLBACK_URL_ERROR_MESSAGE,
@@ -15,9 +19,12 @@ export class Daraja {
    *
    * @static
    * @param {number} shortcode - The Business Shortcode registered with the app
-   * @param {string} consumerKey - Your App's Consumer Key (obtain from Developer's portal)
-   * @param {string} consumerSecret - Your App's Consumer Secret (obtain from Developer's portal)
-   * @param {Partial<IDarajaConfig>} config - Object containing shared request parameters
+   * @param {string} consumerKey - Your App's Consumer Key (obtain from
+   * Developer's portal)
+   * @param {string} consumerSecret - Your App's Consumer Secret (obtain from
+   * Developer's portal)
+   * @param {Partial<IDarajaConfig>} config - Object containing shared request
+   * parameters
    * @returns {Daraja}
    */
   public static getInstance(
@@ -53,20 +60,22 @@ export class Daraja {
 
   /**
    *
-   *
-   * @param {number} Amount - This is the Amount transacted normaly a numeric value.
+   * Initiates online payment on behalf of a customer
+   * @param {number} Amount - This is the Amount transacted normaly a numeric
+   * value.
    * Money that customer pays to the Shorcode.
    * Only whole numbers are supported.
    * @param {number} PhoneNumber - The phone number sending money.
-   * The parameter expected is a Valid Safaricom Mobile Number that is M-Pesa registered in the format 2547XXXXXXXX
+   * The parameter expected is a Valid Safaricom Mobile Number that is M-Pesa
+   * registered in the format 2547XXXXXXXX
    * @param {number} PartyB - The organization receiving the funds.
    * The parameter expected is a 5 to 6 digit
-   * @param {string} AccountReference - An Alpha-Numeric parameter that is defined by your system as an Identifier
+   * @param {string} AccountReference - An Alpha-Numeric parameter that is
+   * defined by your system as an Identifier
    * of the transaction for CustomerPayBillOnline transaction type.
-   * @param {string} TransactionDesc - This is any additional information/comment that can be sent along with the
+   * @param {string} TransactionDesc - This is any additional
+   * information/comment that can be sent along with the
    * request from your system. Maximum of 13 Characters.
-   * @returns
-   * @memberof Daraja
    */
   public async lipaNaMpesa(
     Amount: number,
@@ -74,14 +83,14 @@ export class Daraja {
     PartyB: number,
     AccountReference: string,
     TransactionDesc: string
-  ) {
+  ): Promise<ILNMSuccessResponse> {
+    if (!this.config.LNMCallbackURL) {
+      throw new DarajaConfigurationError(NO_LNM_CALLBACK_URL_ERROR_MESSAGE);
+    }
+    if (!this.config.LNMPasskey) {
+      throw new DarajaConfigurationError(NO_LNM_PASSKEY_ERROR_MESSAGE);
+    }
     try {
-      if (!this.config.LNMCallbackURL) {
-        throw new DarajaConfigurationError(NO_LNM_CALLBACK_URL_ERROR_MESSAGE);
-      }
-      if (!this.config.LNMPasskey) {
-        throw new DarajaConfigurationError(NO_LNM_PASSKEY_ERROR_MESSAGE);
-      }
       if (Date.now() > this.accessTokenExpiry) {
         await this.setAccessToken();
       }
@@ -107,7 +116,48 @@ export class Daraja {
         headers: { Authorization: `Bearer ${this.accessToken}` },
         json: true
       });
-      return response.ResponseDescription;
+      return response;
+    } catch (error) {
+      throw new MPesaError(error.message);
+    }
+  }
+
+  /**
+   *
+   * Checks the status of a Lipa Na M-Pesa Online Payment.
+   * @param {string} CheckoutRequestID - This is a global unique identifier of
+   * the processed checkout transaction request.
+   */
+  public async lipaNaMPesaQuery(
+    CheckoutRequestID: string
+  ): Promise<ILNMQueryResponse> {
+    if (!this.config.LNMPasskey) {
+      throw new DarajaConfigurationError(NO_LNM_PASSKEY_ERROR_MESSAGE);
+    }
+
+    try {
+      if (Date.now() > this.accessTokenExpiry) {
+        await this.setAccessToken();
+      }
+      const timestamp = utils.generateTimestamp(new Date());
+      const response = request.post(
+        'https://sandbox.safaricom.co.ke/mpesa/stkpushquery/v1/query',
+        {
+          body: {
+            BusinessShortCode: this.shortcode,
+            CheckoutRequestID,
+            Password: utils.generateLNMPassword(
+              this.shortcode,
+              this.config.LNMPasskey,
+              timestamp
+            ),
+            Timestamp: timestamp
+          },
+          headers: { Authorization: `Bearer ${this.accessToken}` },
+          json: true
+        }
+      );
+      return response;
     } catch (error) {
       throw new MPesaError(error.message);
     }
