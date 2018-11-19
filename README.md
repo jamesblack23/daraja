@@ -1,5 +1,3 @@
-# Daraja
-
 ![Daraja Logo](/img/daraja.png)
 
 [![npm version](https://badge.fury.io/js/daraja.svg)](https://badge.fury.io/js/daraja)
