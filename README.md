@@ -1,8 +1,5 @@
 # Daraja
 
-![Daraja Logo](/img/daraja.png)
-A NodeJS library to interact with Safaricom's Daraja M-Pesa API
-
 [![npm version](https://badge.fury.io/js/daraja.svg)](https://badge.fury.io/js/daraja)
 
 [![Build Status](https://travis-ci.com/austinewuncler/daraja.svg?branch=master)](https://travis-ci.com/austinewuncler/daraja)
@@ -14,6 +11,8 @@ A NodeJS library to interact with Safaricom's Daraja M-Pesa API
 ## Introduction
 
 This is a JavaScript/TypeScript NodeJS library that simplifies making calls to the Safaricom's M-Pesa Daraja API.
+
+![Daraja Logo](/img/daraja.png)
 
 ## Prerequisites
 
