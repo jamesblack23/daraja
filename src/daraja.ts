@@ -7,6 +7,10 @@ import {
 } from './daraja-response.interface';
 import {
   DarajaConfigurationError,
+  INVALID_AMOUNT_ERROR_MESSAGE,
+  INVALID_BUSINESS_SHORTCODE_ERROR_MESSAGE,
+  INVALID_CREDENTIALS_ERROR_MESSAGE,
+  INVALID_PHONE_NUMBER_ERROR_MESSAGE,
   MPesaError,
   NO_LNM_CALLBACK_URL_ERROR_MESSAGE,
   NO_LNM_PASSKEY_ERROR_MESSAGE
@@ -91,6 +95,17 @@ export class Daraja {
       });
       return response;
     } catch (error) {
+      if (error.error.errorMessage === 'Bad Request - Invalid Amount') {
+        throw new MPesaError(INVALID_AMOUNT_ERROR_MESSAGE);
+      }
+      if (error.error.errorMessage === 'Bad Request - Invalid PhoneNumber') {
+        throw new MPesaError(INVALID_PHONE_NUMBER_ERROR_MESSAGE);
+      }
+      if (
+        error.error.errorMessage === 'Bad Request - Invalid BusinessShortCode'
+      ) {
+        throw new MPesaError(INVALID_BUSINESS_SHORTCODE_ERROR_MESSAGE);
+      }
       throw new MPesaError(error.message);
     }
   }
@@ -242,7 +257,7 @@ export class Daraja {
         'seconds'
       );
     } catch (error) {
-      throw new MPesaError(error.message);
+      throw new MPesaError(INVALID_CREDENTIALS_ERROR_MESSAGE);
     }
   }
 }

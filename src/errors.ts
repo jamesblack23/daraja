@@ -7,6 +7,12 @@ export const NO_LNM_CALLBACK_URL_ERROR_MESSAGE =
   'No Lipa Na Mpesa callback URL found';
 
 export const NO_LNM_PASSKEY_ERROR_MESSAGE = 'No Lipa Na Mpesa Passkey found';
+export const INVALID_CREDENTIALS_ERROR_MESSAGE =
+  'Invalid Consumer Key or Secret';
+export const INVALID_AMOUNT_ERROR_MESSAGE = 'Invalid Amount';
+export const INVALID_PHONE_NUMBER_ERROR_MESSAGE = 'Invalid Phone Number';
+export const INVALID_BUSINESS_SHORTCODE_ERROR_MESSAGE =
+  'Invalid Business Shortcode';
 
 export class DarajaConfigurationError extends Error {
   constructor(message: string) {

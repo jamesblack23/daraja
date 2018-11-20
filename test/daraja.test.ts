@@ -5,6 +5,7 @@ import { assert } from 'chai';
 import * as chai from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 import { Daraja } from '../src/daraja';
+import { INVALID_CREDENTIALS_ERROR_MESSAGE } from '../src/errors';
 import { DarajaBuilder } from '../src/index';
 
 chai.use(chaiAsPromised);
@@ -23,6 +24,30 @@ const MSISDN = parseInt(process.env.MSISDN || '123', 10);
 
 suite('Daraja', function() {
   this.timeout(0);
+
+  suite('invalid consumer credentials', () => {
+    let darajaInvalid: Daraja;
+
+    beforeEach(() => {
+      darajaInvalid = new DarajaBuilder(
+        shortcode,
+        'invalidKey',
+        'invalidSecret'
+      ).build();
+    });
+
+    test('should throw MPesaError when the credentials are invalid', async () => {
+      try {
+        await darajaInvalid.C2BRegisterURLs(
+          'validation',
+          'confirmation',
+          'Completed'
+        );
+      } catch (error) {
+        assert.strictEqual(error.message, INVALID_CREDENTIALS_ERROR_MESSAGE);
+      }
+    });
+  });
 
   suite('lipaNaMpesa()', () => {
     let darajaLNM: Daraja;
