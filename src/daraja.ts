@@ -159,7 +159,7 @@ export class Daraja {
    * @param {string} ConfirmationURL - This is the URL that receives the
    * confirmation request from API upon payment completion
    * @param {('Canceled' | 'Completed')} ResponseType - This parameter
-   * specifies what is to happen if for any reason the validation URL is nor
+   * specifies what is to happen if for any reason the validation URL is not
    * reachable
    */
   public async C2BRegisterURLs(

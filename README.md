@@ -1,3 +1,5 @@
+#
+
 ![Daraja Logo](/img/daraja.png)
 
 [![npm version](https://badge.fury.io/js/daraja.svg)](https://badge.fury.io/js/daraja)
@@ -130,3 +132,20 @@ Finally call the API using the various methods provided on the `Daraja` instance
   ```
 
   upon success, and throws `MPesaError` when the call fails
+
+- C2B Register URLs - `C2BRegisterURLs(ValidationURL, ConfirmationURL, ResponseType)`
+
+  - `ValidationURL` - `string` - This is the URL that receives the validation request from API upon payment submission
+  - `ConfirmationURL` - `string` - This is the URL that receives the confirmation request from API upon payment completion
+  - `ResponseType` - `string` - This parameter specifies what is to happen if for any reason the validation URL is not reachable. Must be either `Canceled` or `Completed`
+
+  Returns a `Promise` which resolves to a `success` string or throws an `MPesaError` when the call fails
+
+- C2B Simulate Transaction - `C2BSimulate(Amount, Msisdn, CommandID, BillRefNumber)`
+
+  - `Amount` - `number` - This is the amount being transacted
+  - `Msisdn` - `number` - This is the phone number initiating the C2B transaction. Must be in the format **2547XXXXXXXX**
+  - `CommandID` - `string` - This is a unique identifier of the transaction type. Must be either `CustomerPayBillOnline` or `CustomerBuyGoodsOnline`
+  - `BillRefNumber` - `string` - This is used on CustomerPayBillOnlineoption only. This is where a customer is expected to enter a unique bill identifier, e.g an Account Number
+
+  Returns a `Promise` which resolves to a `success` string or throws an `MPesaError` when the call fails
