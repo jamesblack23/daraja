@@ -1,3 +1,4 @@
+import * as moment from 'moment';
 import * as request from 'request-promise-native';
 import { IDarajaConfig } from './daraja-config.interface';
 import {
@@ -10,45 +11,13 @@ import {
   NO_LNM_CALLBACK_URL_ERROR_MESSAGE,
   NO_LNM_PASSKEY_ERROR_MESSAGE
 } from './errors';
-import { LNM_URL, OAUTH_URL } from './urls';
-import * as utils from './utils';
+import { urls } from './urls';
 
 export class Daraja {
-  /**
-   *
-   *
-   * @static
-   * @param {number} shortcode - The Business Shortcode registered with the app
-   * @param {string} consumerKey - Your App's Consumer Key (obtain from
-   * Developer's portal)
-   * @param {string} consumerSecret - Your App's Consumer Secret (obtain from
-   * Developer's portal)
-   * @param {Partial<IDarajaConfig>} config - Object containing shared request
-   * parameters
-   * @returns {Daraja}
-   */
-  public static getInstance(
-    shortcode: number,
-    consumerKey: string,
-    consumerSecret: string,
-    config: Partial<IDarajaConfig>
-  ): Daraja {
-    if (!Daraja.daraja) {
-      Daraja.daraja = new Daraja(
-        shortcode,
-        consumerKey,
-        consumerSecret,
-        config
-      );
-    }
-    return Daraja.daraja;
-  }
-
-  private static daraja: Daraja;
   private accessToken: string;
   private accessTokenExpiry: number;
 
-  private constructor(
+  constructor(
     private shortcode: number,
     private consumerKey: string,
     private consumerSecret: string,
@@ -90,12 +59,18 @@ export class Daraja {
     if (!this.config.LNMPasskey) {
       throw new DarajaConfigurationError(NO_LNM_PASSKEY_ERROR_MESSAGE);
     }
+
+    const url =
+      this.config.environment === 'production'
+        ? urls.production.LNMRequest
+        : urls.sandbox.LNMRequest;
+
     try {
       if (Date.now() > this.accessTokenExpiry) {
         await this.setAccessToken();
       }
-      const timestamp = utils.generateTimestamp(new Date());
-      const response = await request.post(LNM_URL, {
+      const timestamp = moment().format('YYYYMMDDHHmmss');
+      const response = await request.post(url, {
         body: {
           AccountReference,
           Amount,
@@ -103,11 +78,9 @@ export class Daraja {
           CallBackURL: this.config.LNMCallbackURL,
           PartyA: PhoneNumber,
           PartyB,
-          Password: utils.generateLNMPassword(
-            this.shortcode,
-            this.config.LNMPasskey,
-            timestamp
-          ),
+          Password: Buffer.from(
+            `${this.shortcode}${this.config.LNMPasskey}${timestamp}`
+          ).toString('base64'),
           PhoneNumber,
           Timestamp: timestamp,
           TransactionDesc,
@@ -135,28 +108,28 @@ export class Daraja {
       throw new DarajaConfigurationError(NO_LNM_PASSKEY_ERROR_MESSAGE);
     }
 
+    const url =
+      this.config.environment === 'production'
+        ? urls.production.LNMQuery
+        : urls.sandbox.LNMQuery;
+
     try {
       if (Date.now() > this.accessTokenExpiry) {
         await this.setAccessToken();
       }
-      const timestamp = utils.generateTimestamp(new Date());
-      const response = request.post(
-        'https://sandbox.safaricom.co.ke/mpesa/stkpushquery/v1/query',
-        {
-          body: {
-            BusinessShortCode: this.shortcode,
-            CheckoutRequestID,
-            Password: utils.generateLNMPassword(
-              this.shortcode,
-              this.config.LNMPasskey,
-              timestamp
-            ),
-            Timestamp: timestamp
-          },
-          headers: { Authorization: `Bearer ${this.accessToken}` },
-          json: true
-        }
-      );
+      const timestamp = moment().format('YYYYMMDDHHmmss');
+      const response = request.post(url, {
+        body: {
+          BusinessShortCode: this.shortcode,
+          CheckoutRequestID,
+          Password: Buffer.from(
+            `${this.shortcode}${this.config.LNMPasskey}${timestamp}`
+          ).toString('base64'),
+          Timestamp: timestamp
+        },
+        headers: { Authorization: `Bearer ${this.accessToken}` },
+        json: true
+      });
       return response;
     } catch (error) {
       throw new MPesaError(error.message);
@@ -164,8 +137,13 @@ export class Daraja {
   }
 
   private async setAccessToken() {
+    const url =
+      this.config.environment === 'production'
+        ? urls.production.OAuth
+        : urls.sandbox.OAuth;
+
     try {
-      const response = await request.get(OAUTH_URL, {
+      const response = await request.get(url, {
         auth: { user: this.consumerKey, pass: this.consumerSecret },
         json: true,
         qs: { grant_type: 'client_credentials' }

@@ -26,7 +26,8 @@ export class DarajaBuilder {
   constructor(
     private shortcode: number,
     private consumerKey: string,
-    private consumerSecret: string
+    private consumerSecret: string,
+    private environment: 'sandbox' | 'production' = 'sandbox'
   ) {
     this.LNMPasskey = '';
     this.LNMCallbackURL = '';
@@ -64,8 +65,7 @@ export class DarajaBuilder {
   }
 
   public build(): Daraja {
-    const config: Partial<IDarajaConfig> = {};
-
+    const config: Partial<IDarajaConfig> = { environment: this.environment };
     if (this.LNMCallbackURL) {
       config.LNMCallbackURL = this.LNMCallbackURL;
     }
@@ -73,7 +73,7 @@ export class DarajaBuilder {
       config.LNMPasskey = this.LNMPasskey;
     }
 
-    return Daraja.getInstance(
+    return new Daraja(
       this.shortcode,
       this.consumerKey,
       this.consumerSecret,
