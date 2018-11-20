@@ -15,7 +15,7 @@ import { urls } from './urls';
 
 export class Daraja {
   private accessToken: string;
-  private accessTokenExpiry: number;
+  private accessTokenExpiry: moment.Moment;
 
   constructor(
     private shortcode: number,
@@ -24,13 +24,13 @@ export class Daraja {
     private config: Partial<IDarajaConfig>
   ) {
     this.accessToken = '';
-    this.accessTokenExpiry = Date.now();
+    this.accessTokenExpiry = moment();
   }
 
   /**
    *
    * Initiates online payment on behalf of a customer
-   * @param {number} Amount - This is the Amount transacted normaly a numeric
+   * @param {number} Amount - This is the Amount transacted normally a numeric
    * value.
    * Money that customer pays to the Shorcode.
    * Only whole numbers are supported.
@@ -66,7 +66,7 @@ export class Daraja {
         : urls.sandbox.LNMRequest;
 
     try {
-      if (Date.now() > this.accessTokenExpiry) {
+      if (moment().isAfter(this.accessTokenExpiry)) {
         await this.setAccessToken();
       }
       const timestamp = moment().format('YYYYMMDDHHmmss');
@@ -114,7 +114,7 @@ export class Daraja {
         : urls.sandbox.LNMQuery;
 
     try {
-      if (Date.now() > this.accessTokenExpiry) {
+      if (moment().isAfter(this.accessTokenExpiry)) {
         await this.setAccessToken();
       }
       const timestamp = moment().format('YYYYMMDDHHmmss');
@@ -136,6 +136,94 @@ export class Daraja {
     }
   }
 
+  /**
+   *
+   * Register validation and confirmation URLs on M-Pesa
+   * @param {string} ValidationURL - This is the URL that receives the
+   * validation request from API upon payment submission
+   * @param {string} ConfirmationURL - This is the URL that receives the
+   * confirmation request from API upon payment completion
+   * @param {('Canceled' | 'Completed')} ResponseType - This parameter
+   * specifies what is to happen if for any reason the validation URL is nor
+   * reachable
+   */
+  public async C2BRegisterURLs(
+    ValidationURL: string,
+    ConfirmationURL: string,
+    ResponseType: 'Canceled' | 'Completed'
+  ): Promise<string> {
+    const url =
+      this.config.environment === 'production'
+        ? urls.production.C2BRegisterURLs
+        : urls.sandbox.C2BRegisterURLs;
+
+    try {
+      if (moment().isAfter(this.accessTokenExpiry)) {
+        await this.setAccessToken();
+      }
+      const response = await request.post(url, {
+        body: {
+          ConfirmationURL,
+          ResponseType,
+          ShortCode: this.shortcode,
+          ValidationURL
+        },
+        headers: { Authorization: `Bearer ${this.accessToken}` },
+        json: true
+      });
+      return response.ResponseDescription;
+    } catch (error) {
+      throw new MPesaError(error.message);
+    }
+  }
+
+  /**
+   *
+   * Simulate payment requests from Client to Business (C2B). Only available in
+   * the 'sandbox' environment
+   * @param {number} Amount - This is the amount being transacted
+   * @param {number} Msisdn - This is the phone number initiating the C2B
+   * transaction
+   * @param {('CustomerPayBillOnline' | 'CustomerBuyGoodsOnline')} CommandID -
+   * This is a unique identifier of the transaction type
+   * @param {string} BillRefNumber - This is used on CustomerPayBillOnline
+   * option only. This is where a customer is expected to enter a unique bill
+   * identifier, e.g an Account Number
+   */
+  public async C2BSimulate(
+    Amount: number,
+    Msisdn: number,
+    CommandID: 'CustomerPayBillOnline' | 'CustomerBuyGoodsOnline',
+    BillRefNumber: string
+  ): Promise<string> {
+    if (!(this.config.environment === 'sandbox')) {
+      throw new MPesaError('Cannot simulate C2B transactions on Production');
+    }
+    const url = urls.sandbox.C2BSimulate;
+
+    try {
+      if (moment().isAfter(this.accessTokenExpiry)) {
+        await this.setAccessToken();
+      }
+
+      const response = await request.post(url, {
+        body: {
+          Amount,
+          BillRefNumber,
+          CommandID,
+          Msisdn,
+          ShortCode: this.shortcode
+        },
+        headers: { Authorization: `Bearer ${this.accessToken}` },
+        json: true
+      });
+
+      return response.ResponseDescription;
+    } catch (error) {
+      throw new MPesaError(error.message);
+    }
+  }
+
   private async setAccessToken() {
     const url =
       this.config.environment === 'production'
@@ -149,8 +237,10 @@ export class Daraja {
         qs: { grant_type: 'client_credentials' }
       });
       this.accessToken = response.access_token;
-      this.accessTokenExpiry =
-        this.accessTokenExpiry + parseInt(response.expires_in, 10) * 1000;
+      this.accessTokenExpiry = moment().add(
+        parseInt(response.expires_in, 10),
+        'seconds'
+      );
     } catch (error) {
       throw new MPesaError(error.message);
     }

@@ -19,6 +19,6 @@ export class DarajaConfigurationError extends Error {
 export class MPesaError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = 'MPesaExpressError';
+    this.name = 'MPesaError';
   }
 }
