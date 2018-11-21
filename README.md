@@ -41,7 +41,7 @@ const darajaBuilder = new DarajaBuilder(
 );
 ```
 
-- `shortcode: number` (required) - the organization's shortcode (Paybill or Buygoods - A 5 to 6 digit account number) used to identify an organization
+- `shortcode`: `number` (required) - the organization's shortcode (Paybill or Buygoods - A 5 to 6 digit account number) used to identify an organization
 - `consumerKey`: `string` (required) - the App's Consumer Key
 - `consumerSecret`: `string` (required) - the App's Consumer Secret
 - `environment`: `string` (optional, defaults to `sandbox`) - the environment Daraja will run on. Acceptable values are `sandbox` and `production`.
