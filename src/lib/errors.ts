@@ -13,6 +13,12 @@ export const ERROR_MISSING_CONSUMER_KEY = 'No consumer Key passed';
 export const ERROR_MISSING_CONSUMER_SECRET = 'No consumer Secret passed';
 export const ERROR_INVALID_ENVIRONMENT =
   'Invalid environment parameter passed. Only sandbox and production are allowed';
+export const ERROR_NO_VALIDATION_URL = 'No C2BValidationURL passed';
+export const ERROR_NO_CONFIRMATION_URL = 'No C2BConfirmationURL passed';
+export const ERROR_INVALID_C2B_RESPONSE_TYPE =
+  'Invalid C2B default ResponseType';
+export const ERROR_SIMULATE_PRODUCTION =
+  'Cannot simulate C2B transactions on Production';
 
 export class DarajaConfigError extends Error {
   constructor(message: string) {

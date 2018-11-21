@@ -1,5 +1,3 @@
-#
-
 ![Daraja Logo](/img/daraja.png)
 
 [![npm version](https://badge.fury.io/js/daraja.svg)](https://badge.fury.io/js/daraja)
@@ -7,32 +5,6 @@
 [![Coverage Status](https://coveralls.io/repos/github/austinewuncler/daraja/badge.svg?branch=master)](https://coveralls.io/github/austinewuncler/daraja?branch=master)
 [![dependencies Status](https://david-dm.org/austinewuncler/daraja/status.svg)](https://david-dm.org/austinewuncler/daraja)
 [![Known Vulnerabilities](https://snyk.io/test/github/austinewuncler/daraja/badge.svg)](https://snyk.io/test/github/austinewuncler/daraja)
-
-## Introduction
-
-This is a JavaScript/TypeScript NodeJS library that simplifies making calls to the Safaricom's M-Pesa Daraja API.
-
-## Prerequisites
-
-You need an account on Safaricom's [Developer Portal](https://developer.safaricom.co.ke/) before using this library. Create an account if you don't already have one, and log in. Then create an app (sandbox or production) to get the required credentials (Consumer Key & Consumer Secret).
-
-## Installation
-
-You need [NodeJS](http://nodejs.org) installed to use this package.
-Verify NodeJS and npm installation by
-
-```sh
-$ node -v
-v10.13.0
-$ npm -v
-6.4.1
-```
-
-Then install the library in your project directory
-
-```sh
-npm install --save daraja
-```
 
 ## Example
 
@@ -56,97 +28,110 @@ daraja
   .catch(error => console.log(error));
 ```
 
-## Usage
+## API
 
-First you instantiate the `DarajaBuilder` class by passing 3 arguments in the constructor.
-
-```javascript
-new DarajaBuilder(shortcode, consumerKey, consumerSecret);
-```
-
-- `shortcode` - `number` This is the organization's shortcode (Paybill or Buygoods - A 5 to 6 digit account number) used to identify an organization
-- `consumerKey` - `string` Your App's Consumer Key (obtain from Developer's portal)
-- `consumerSecret` - `string` Your App's Consumer Secret (obtain from Developer's portal)
-
-For example
+The `DarajaBuilder` class is responsible for creating a properly configured `Daraja` instance.
 
 ```javascript
-const darajaBuilder = new DarajaBuilder(12345, 'consumerKey', 'consumerSecret');
+const darajaBuilder = new DarajaBuilder(
+  shortcode,
+  consumerKey,
+  consumerSecret,
+  environment
+);
 ```
 
-Then you add configuration parameters via chained method calls on the `DarajaBuilder` instance.
+- `shortcode: number` (required) - the organization's shortcode (Paybill or Buygoods - A 5 to 6 digit account number) used to identify an organization
+- `consumerKey`: `string` (required) - the App's Consumer Key
+- `consumerSecret`: `string` (required) - the App's Consumer Secret
+- `environment`: `string` (optional, defaults to `sandbox`) - the environment Daraja will run on. Acceptable values are `sandbox` and `production`.
+
+The following chainable `DarajaBuilder` instance methods return a newly configured `DarajaBuilder` instance:
+
+- `addLNMPasskey(LNMPasskey)` - Adds the Lipa na M-Pesa Passkey to the configuration.
+  - `LNMPasskey`: `string` (required for Lipa Na M-Pesa Online transactions) - the app's Lipa Na M-Pesa Online Passkey
+- `addLNMCallbackURL(LNMCallbackURL)` - Adds the Callback URL to receive Lipa na M-Pesa Online transaction notifications
+  - `LNMCallbackURL`: `string` (required for Lipa Na M-Pesa Online transactions) - the URL to where M-Pesa will send notifications of Lipa Na M-Pesa transactions.
+
+### Lipa Na M-Pesa
 
 ```javascript
-darajaBuilder.addLNMPasskey('passkey').addLNMCallbackURL('callbackURL');
+const daraja = darajaBuilder
+  .addLNMPasskey(LNMPasskey)
+  .addLNMCallbackURL(LNMCallbackURL)
+  .build();
 ```
 
-These are all the chainable methods:
+#### Lipa Na M-Pesa Online Request
 
-- `addLNMPasskey(passkey)` - Takes a string `passkey` argument and adds the Lipa na Mpesa Online Passkey which is required for Lipa na MPesa Online API transactions
-- `addLNMCallbackURL(callbackURL)` - Takes a string `callbackURL` argument which is the endpoint to which M-Pesa sends notifications to for a Lipa na M-Pesa transaction.
+Initiate an online payment on behalf of a customer. Activates an STK push to the customer prompting them to enter their correct M-Pesa PIN to complete the transaction.
 
-Call the `build()` method to get a configured `Daraja` instance.
+`daraja.lipaNaMpesaRequest(amount, sender, recipient, accountReference, transactionDescription)`
+
+- `amount`: `number` (required) - the Amount to be transacted
+- `sender`: `number` (required) - the phone number sending money. The parameter expected is a Valid Safaricom Mobile Number that is M-Pesa registered in the format 2547XXXXXXXX
+- `recipient`: `number` (required) - the PayBill or Till Number for the organization receiving the funds.
+- `accountReference`: `string` (required) - an Alpha-Numeric parameter that is defined by your system as an Identifier
+- `transactionDescription`: `string` (required) - any additional information/comment that can be sent along with the request from your system. Maximum of 13 Characters
+
+Returns a `Promise` which resolves to a `string` value for the `CheckoutRequestID`
+
+Throws an `MPesaError` when something goes wrong
+
+#### Lipa Na M-Pesa Online Query
+
+Check the status of a Lipa Na M-Pesa Online Payment.
+
+`daraja.lipaNaMPesaQuery(checkoutRequestID)`
+
+- `checkoutRequestID`: `string` (required) - A global unique identifier of the processed checkout transaction request
+
+Returns a `Promise` which resolves to a `string` value for the `ResultCode`
+
+Throws an `MPesaError` when something goes wrong
+
+### C2B
 
 ```javascript
 const daraja = darajaBuilder.build();
 ```
 
-Finally call the API using the various methods provided on the `Daraja` instance.
+#### Register URLs
 
-- Lipa Na M-Pesa Online - `lipaNaMpesa(Amount, PhoneNumber, PartyB, AccountReference, TransactionDesc)`
+Register validation and confirmation URLs on M-Pesa
 
-  - `Amount` - `number` - This is the amount transacted normally a numeric value. It is the money that the customer pays to the shortcode
-  - `PhoneNumber` - `number` - This is the phone number sending the money. This parameter is expected to be a valid Safaricom mobile number that is M-Pesa registered. It must be in the format **2547XXXXXXXX**
-  - `PartyB` - `number` - The organization receiving the funds.
-  - `AccountReference` - `string` - This is an alphanumeric parameter that is defined by your system as an identifier of the transaction for _CustomerPayBillOnline_ transaction type.
-  - `TransactionDesc` - `string` - This is any additional information/comment that can be sent along with the request from your system. Maximum of 13 characters.
+`daraja.C2BRegisterURLs(validationURL, confirmationURL, defaultResponseType)`
 
-  Returns a `Promise` which resolves to a successful response from M-Pesa
+- `validationURL`: `string` (required) - the URL that receives the validation request from API upon payment submission
+- `confirmationURL`: `string` (required) - the URL that receives the confirmation request from API upon payment completion
+- `defaultResponseType`: `string` (optional, defaults to `Completed`) - This parameter specifies what is to happen if for any reason the validation URL is not reachable
 
-  ```javascript
-  {
-    MerchantRequestID: "16813-1590513-1",
-    CheckoutRequestID: "ws_CO_DMZ_12321_23423476",
-    ResponseCode: "0",
-    ResponseDescription: "Success. Request accepted for processing",
-    CustomerMessage: "Success. Request accepted for processing"
-  }
-  ```
+Returns a `Promise` which resolves to a `string` value for `ResponseDescription`
 
-  upon success, and throws `MPesaError` when the call fails
+Throws `MPesaError` when something goes wrong
 
-- Lipa Na M-Pesa Online Query- `lipaNaMPesaQuery(CheckoutRequestID)`
+#### Simulate Transaction
 
-  - `CheckoutRequestID` - `string` - This is a global unique identifier of the processed checkout transaction request.
+Simulate payment requests from Client to Business (C2B). Only available in the 'sandbox' environment
 
-  Returns a `Promise` which resolves to a successful response from M-Pesa
+`daraja.C2BSimulate(amount, sender, billReferenceNumber)`
 
-  ```javascript
-  {
-    ResponseCode: "0",
-    ResponseDescription: "The service request has been accepted successsfully",
-    MerchantRequestID: "16813-1590513-1",
-    CheckoutRequestID: "ws_CO_DMZ_123212312_2342347678234",
-    ResultCode: "0",
-    ResultDesc: "The service request is processed successfully."
-  }
-  ```
+- `amount`: `number` (required) - the amount being transacted
+- `sender`: `number` (required) - the phone number initiating the C2B transaction
+- `billReferenceNumber`: `string` (required) - a unique bill identifier, e.g an Account Number
 
-  upon success, and throws `MPesaError` when the call fails
+Returns a `Promise` that resolves to a `string` value for `ResponseDescription`
 
-- C2B Register URLs - `C2BRegisterURLs(ValidationURL, ConfirmationURL, ResponseType)`
+Throws `MPesaError` when something goes wrong
 
-  - `ValidationURL` - `string` - This is the URL that receives the validation request from API upon payment submission
-  - `ConfirmationURL` - `string` - This is the URL that receives the confirmation request from API upon payment completion
-  - `ResponseType` - `string` - This parameter specifies what is to happen if for any reason the validation URL is not reachable. Must be either `Canceled` or `Completed`
+## Install
 
-  Returns a `Promise` which resolves to a `success` string or throws an `MPesaError` when the call fails
+With [Node](https://nodejs.org/en/) & [npm](https://npmjs.org/) installed, run
 
-- C2B Simulate Transaction - `C2BSimulate(Amount, Msisdn, CommandID, BillRefNumber)`
+```sh
+npm install daraja
+```
 
-  - `Amount` - `number` - This is the amount being transacted
-  - `Msisdn` - `number` - This is the phone number initiating the C2B transaction. Must be in the format **2547XXXXXXXX**
-  - `CommandID` - `string` - This is a unique identifier of the transaction type. Must be either `CustomerPayBillOnline` or `CustomerBuyGoodsOnline`
-  - `BillRefNumber` - `string` - This is used on CustomerPayBillOnlineoption only. This is where a customer is expected to enter a unique bill identifier, e.g an Account Number
+## License
 
-  Returns a `Promise` which resolves to a `success` string or throws an `MPesaError` when the call fails
+MIT

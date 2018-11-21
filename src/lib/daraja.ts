@@ -1,19 +1,16 @@
 import * as moment from 'moment';
 import * as request from 'request-promise-native';
 import { IDarajaConfig } from './daraja-config.interface';
-import {
-  ILNMQueryResponse,
-  ILNMSuccessResponse
-} from './daraja-response.interface';
 
 import {
   DarajaConfigError,
-  ERROR_INVALID_AMOUNT,
-  ERROR_INVALID_BUSINESS_SHORTCODE,
+  ERROR_INVALID_C2B_RESPONSE_TYPE,
   ERROR_INVALID_CREDENTIALS,
-  ERROR_INVALID_PHONE_NUMBER,
   ERROR_NO_CALLBACK_URL,
+  ERROR_NO_CONFIRMATION_URL,
   ERROR_NO_LNM_PASSKEY,
+  ERROR_NO_VALIDATION_URL,
+  ERROR_SIMULATE_PRODUCTION,
   MPesaError
 } from './errors';
 import { urls } from './urls';
@@ -43,29 +40,29 @@ export class Daraja {
   /**
    *
    * Initiates online payment on behalf of a customer
-   * @param {number} Amount - This is the Amount transacted normally a numeric
+   * @param {number} amount - This is the Amount transacted normally a numeric
    * value.
    * Money that customer pays to the Shorcode.
    * Only whole numbers are supported.
-   * @param {number} PhoneNumber - The phone number sending money.
+   * @param {number} sender - The phone number sending money.
    * The parameter expected is a Valid Safaricom Mobile Number that is M-Pesa
    * registered in the format 2547XXXXXXXX
-   * @param {number} PartyB - The organization receiving the funds.
+   * @param {number} recipient - The organization receiving the funds.
    * The parameter expected is a 5 to 6 digit
-   * @param {string} AccountReference - An Alpha-Numeric parameter that is
+   * @param {string} accountReference - An Alpha-Numeric parameter that is
    * defined by your system as an Identifier
    * of the transaction for CustomerPayBillOnline transaction type.
-   * @param {string} TransactionDesc - This is any additional
+   * @param {string} transactionDescription - This is any additional
    * information/comment that can be sent along with the
    * request from your system. Maximum of 13 Characters.
    */
   public async lipaNaMpesaRequest(
-    Amount: number,
-    PhoneNumber: number,
-    PartyB: number,
-    AccountReference: string,
-    TransactionDesc: string
-  ): Promise<ILNMSuccessResponse> {
+    amount: number,
+    sender: number,
+    recipient: number,
+    accountReference: string,
+    transactionDescription: string
+  ) {
     if (!this.config.LNMCallbackURL) {
       throw new DarajaConfigError(ERROR_NO_CALLBACK_URL);
     }
@@ -85,24 +82,24 @@ export class Daraja {
       const timestamp = moment().format('YYYYMMDDHHmmss');
       const response = await request.post(url, {
         body: {
-          AccountReference,
-          Amount,
+          AccountReference: accountReference,
+          Amount: amount,
           BusinessShortCode: this.shortcode,
           CallBackURL: this.config.LNMCallbackURL,
-          PartyA: PhoneNumber,
-          PartyB,
+          PartyA: sender,
+          PartyB: recipient,
           Password: Buffer.from(
             `${this.shortcode}${this.config.LNMPasskey}${timestamp}`
           ).toString('base64'),
-          PhoneNumber,
+          PhoneNumber: sender,
           Timestamp: timestamp,
-          TransactionDesc,
+          TransactionDesc: transactionDescription,
           TransactionType: 'CustomerPayBillOnline'
         },
         headers: { Authorization: `Bearer ${this.accessToken}` },
         json: true
       });
-      return response;
+      return response.CheckoutRequestID;
     } catch (error) {
       throw new MPesaError(error.message);
     }
@@ -114,9 +111,7 @@ export class Daraja {
    * @param {string} CheckoutRequestID - This is a global unique identifier of
    * the processed checkout transaction request.
    */
-  public async lipaNaMPesaQuery(
-    CheckoutRequestID: string
-  ): Promise<ILNMQueryResponse> {
+  public async lipaNaMPesaQuery(checkoutRequestID: string) {
     if (!this.config.LNMPasskey) {
       throw new DarajaConfigError(ERROR_NO_LNM_PASSKEY);
     }
@@ -131,10 +126,10 @@ export class Daraja {
         await this.setAccessToken();
       }
       const timestamp = moment().format('YYYYMMDDHHmmss');
-      const response = request.post(url, {
+      const response = await request.post(url, {
         body: {
           BusinessShortCode: this.shortcode,
-          CheckoutRequestID,
+          CheckoutRequestID: checkoutRequestID,
           Password: Buffer.from(
             `${this.shortcode}${this.config.LNMPasskey}${timestamp}`
           ).toString('base64'),
@@ -143,7 +138,7 @@ export class Daraja {
         headers: { Authorization: `Bearer ${this.accessToken}` },
         json: true
       });
-      return response;
+      return response.ResultCode;
     } catch (error) {
       throw new MPesaError(error.message);
     }
@@ -152,34 +147,46 @@ export class Daraja {
   /**
    *
    * Register validation and confirmation URLs on M-Pesa
-   * @param {string} ValidationURL - This is the URL that receives the
+   * @param {string} validationURL - This is the URL that receives the
    * validation request from API upon payment submission
-   * @param {string} ConfirmationURL - This is the URL that receives the
+   * @param {string} confirmationURL - This is the URL that receives the
    * confirmation request from API upon payment completion
-   * @param {('Canceled' | 'Completed')} ResponseType - This parameter
+   * @param {('Canceled' | 'Completed')} defaultResponseType - This parameter
    * specifies what is to happen if for any reason the validation URL is not
    * reachable
    */
   public async C2BRegisterURLs(
-    ValidationURL: string,
-    ConfirmationURL: string,
-    ResponseType: 'Canceled' | 'Completed'
+    validationURL: string,
+    confirmationURL: string,
+    defaultResponseType: 'Canceled' | 'Completed' = 'Completed'
   ): Promise<string> {
     const url =
       this.config.environment === 'production'
         ? urls.production.C2BRegisterURLs
         : urls.sandbox.C2BRegisterURLs;
 
+    if (!validationURL) {
+      throw new MPesaError(ERROR_NO_VALIDATION_URL);
+    }
+    if (!confirmationURL) {
+      throw new MPesaError(ERROR_NO_CONFIRMATION_URL);
+    }
+    if (
+      defaultResponseType !== 'Canceled' &&
+      defaultResponseType !== 'Completed'
+    ) {
+      throw new MPesaError(ERROR_INVALID_C2B_RESPONSE_TYPE);
+    }
     try {
       if (moment().isAfter(this.accessTokenExpiry)) {
         await this.setAccessToken();
       }
       const response = await request.post(url, {
         body: {
-          ConfirmationURL,
-          ResponseType,
+          ConfirmationURL: confirmationURL,
+          ResponseType: defaultResponseType,
           ShortCode: this.shortcode,
-          ValidationURL
+          ValidationURL: validationURL
         },
         headers: { Authorization: `Bearer ${this.accessToken}` },
         json: true
@@ -194,23 +201,20 @@ export class Daraja {
    *
    * Simulate payment requests from Client to Business (C2B). Only available in
    * the 'sandbox' environment
-   * @param {number} Amount - This is the amount being transacted
-   * @param {number} Msisdn - This is the phone number initiating the C2B
+   * @param {number} amount - This is the amount being transacted
+   * @param {number} sender - This is the phone number initiating the C2B
    * transaction
-   * @param {('CustomerPayBillOnline' | 'CustomerBuyGoodsOnline')} CommandID -
-   * This is a unique identifier of the transaction type
-   * @param {string} BillRefNumber - This is used on CustomerPayBillOnline
+   * @param {string} billReferenceNumber - This is used on CustomerPayBillOnline
    * option only. This is where a customer is expected to enter a unique bill
    * identifier, e.g an Account Number
    */
   public async C2BSimulate(
-    Amount: number,
-    Msisdn: number,
-    CommandID: 'CustomerPayBillOnline' | 'CustomerBuyGoodsOnline',
-    BillRefNumber: string
+    amount: number,
+    sender: number,
+    billReferenceNumber: string
   ): Promise<string> {
     if (!(this.config.environment === 'sandbox')) {
-      throw new MPesaError('Cannot simulate C2B transactions on Production');
+      throw new MPesaError(ERROR_SIMULATE_PRODUCTION);
     }
     const url = urls.sandbox.C2BSimulate;
 
@@ -221,10 +225,10 @@ export class Daraja {
 
       const response = await request.post(url, {
         body: {
-          Amount,
-          BillRefNumber,
-          CommandID,
-          Msisdn,
+          Amount: amount,
+          BillRefNumber: billReferenceNumber,
+          CommandID: 'CustomerPayBillOnline',
+          Msisdn: sender,
           ShortCode: this.shortcode
         },
         headers: { Authorization: `Bearer ${this.accessToken}` },
