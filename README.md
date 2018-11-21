@@ -4,6 +4,7 @@
 
 [![npm version](https://badge.fury.io/js/daraja.svg)](https://badge.fury.io/js/daraja)
 [![Build Status](https://travis-ci.com/austinewuncler/daraja.svg?branch=master)](https://travis-ci.com/austinewuncler/daraja)
+[![Coverage Status](https://coveralls.io/repos/github/austinewuncler/daraja/badge.svg?branch=master)](https://coveralls.io/github/austinewuncler/daraja?branch=master)
 [![dependencies Status](https://david-dm.org/austinewuncler/daraja/status.svg)](https://david-dm.org/austinewuncler/daraja)
 [![Known Vulnerabilities](https://snyk.io/test/github/austinewuncler/daraja/badge.svg)](https://snyk.io/test/github/austinewuncler/daraja)
 
