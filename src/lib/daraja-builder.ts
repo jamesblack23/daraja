@@ -13,6 +13,11 @@ import {
 } from './errors';
 
 export class DarajaBuilder {
+  private shortcode: number;
+  private consumerKey: string;
+  private consumerSecret: string;
+  private environment: 'sandbox' | 'production';
+
   private LNMPasskey: string | null;
   private LNMCallbackURL: string | null;
 
@@ -22,12 +27,14 @@ export class DarajaBuilder {
    * (Paybill or Buygoods - A 5 to 6 digit account number) used to identify an organization
    * @param {string} consumerKey - Your App's Consumer Key (obtain from Developer's portal)
    * @param {string} consumerSecret - Your App's Consumer Secret (obtain from Developer's portal)
+   * @param {string} environment - The environment to run Daraja. Can be either
+   * 'sandbox' or 'production'. Defaults to 'sandbox'
    */
   constructor(
-    private shortcode: number,
-    private consumerKey: string,
-    private consumerSecret: string,
-    private environment: 'sandbox' | 'production' = 'sandbox'
+    shortcode: number,
+    consumerKey: string,
+    consumerSecret: string,
+    environment: 'sandbox' | 'production' = 'sandbox'
   ) {
     if (!shortcode) {
       throw new DarajaConfigError(ERROR_MISSING_SHORTCODE);
@@ -41,6 +48,11 @@ export class DarajaBuilder {
     if (environment !== 'sandbox' && environment !== 'production') {
       throw new DarajaConfigError(ERROR_INVALID_ENVIRONMENT);
     }
+
+    this.shortcode = shortcode;
+    this.consumerKey = consumerKey;
+    this.consumerSecret = consumerSecret;
+    this.environment = environment;
 
     this.LNMPasskey = null;
     this.LNMCallbackURL = null;
@@ -84,8 +96,6 @@ export class DarajaBuilder {
   /**
    *
    * Bundles all provided configuration options and creates a Daraja instance
-   * @returns {Daraja}
-   * @memberof DarajaBuilder
    */
   public build(): Daraja {
     const config: Partial<IDarajaConfig> = { environment: this.environment };

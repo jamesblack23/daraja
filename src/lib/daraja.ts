@@ -19,15 +19,23 @@ import {
 import { urls } from './urls';
 
 export class Daraja {
+  private shortcode: number;
+  private consumerKey: string;
+  private consumerSecret: string;
+  private config: Partial<IDarajaConfig>;
   private accessToken: string;
   private accessTokenExpiry: moment.Moment;
 
   constructor(
-    private shortcode: number,
-    private consumerKey: string,
-    private consumerSecret: string,
-    private config: Partial<IDarajaConfig>
+    shortcode: number,
+    consumerKey: string,
+    consumerSecret: string,
+    config: Partial<IDarajaConfig>
   ) {
+    this.shortcode = shortcode;
+    this.consumerKey = consumerKey;
+    this.consumerSecret = consumerSecret;
+    this.config = config;
     this.accessToken = '';
     this.accessTokenExpiry = moment();
   }
@@ -51,7 +59,7 @@ export class Daraja {
    * information/comment that can be sent along with the
    * request from your system. Maximum of 13 Characters.
    */
-  public async lipaNaMpesa(
+  public async lipaNaMpesaRequest(
     Amount: number,
     PhoneNumber: number,
     PartyB: number,
@@ -96,17 +104,6 @@ export class Daraja {
       });
       return response;
     } catch (error) {
-      if (error.error.errorMessage === 'Bad Request - Invalid Amount') {
-        throw new MPesaError(ERROR_INVALID_AMOUNT);
-      }
-      if (error.error.errorMessage === 'Bad Request - Invalid PhoneNumber') {
-        throw new MPesaError(ERROR_INVALID_PHONE_NUMBER);
-      }
-      if (
-        error.error.errorMessage === 'Bad Request - Invalid BusinessShortCode'
-      ) {
-        throw new MPesaError(ERROR_INVALID_BUSINESS_SHORTCODE);
-      }
       throw new MPesaError(error.message);
     }
   }

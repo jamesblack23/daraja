@@ -5,10 +5,9 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "test": "npm run build && mocha --ui tdd test/**/*.test.js",
-    "test:dev": "mocha --ui tdd -r ts-node/register test/**/*.test.ts",
+    "test": "npm run build && nyc mocha --ui tdd test/**/*.test.js",
     "coverage": "nyc report --reporter=text-lcov | coveralls",
-    "build": "rimraf dist coverage .nyc_output && tsc",
+    "build": "rimraf dist && tsc",
     "prepare": "npm run build",
     "version": "git add -A src",
     "postversion": "git push && git push --tags"
