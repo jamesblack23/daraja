@@ -2,13 +2,21 @@ import { Daraja } from './daraja';
 import { IDarajaConfig } from './daraja-config.interface';
 import {
   DarajaConfigError,
+  ERROR_B2C_QUEUE_TIMEOUT_URL_OVERRIDE,
+  ERROR_B2C_RESULT_URL_OVERRIDE,
   ERROR_CALLBACK_URL_OVERRIDE,
+  ERROR_INITIATOR_NAME_OVERRIDE,
+  ERROR_INITIATOR_PASSWORD_OVERRIDE,
   ERROR_INVALID_ENVIRONMENT,
   ERROR_LNM_PASSKEY_OVERRIDE,
   ERROR_MISSING_CONSUMER_KEY,
   ERROR_MISSING_CONSUMER_SECRET,
   ERROR_MISSING_SHORTCODE,
+  ERROR_NO_B2C_QUEUE_TIMEOUT_URL,
+  ERROR_NO_B2C_RESULT_URL,
   ERROR_NO_CALLBACK_URL,
+  ERROR_NO_INITIATOR_NAME,
+  ERROR_NO_INITIATOR_PASSWORD,
   ERROR_NO_LNM_PASSKEY
 } from './errors';
 
@@ -20,6 +28,10 @@ export class DarajaBuilder {
 
   private LNMPasskey: string | null;
   private LNMCallbackURL: string | null;
+  private initiatorName: string | null;
+  private initiatorPassword: string | null;
+  private B2CResultURL: string | null;
+  private B2CQueueTimeoutURL: string | null;
 
   /**
    * Creates an instance of DarajaBuilder.
@@ -56,6 +68,10 @@ export class DarajaBuilder {
 
     this.LNMPasskey = null;
     this.LNMCallbackURL = null;
+    this.initiatorName = null;
+    this.initiatorPassword = null;
+    this.B2CResultURL = null;
+    this.B2CQueueTimeoutURL = null;
   }
 
   /**
@@ -95,6 +111,73 @@ export class DarajaBuilder {
 
   /**
    *
+   * Adds the initiator name
+   * @param {string} initiatorName - The username of the M-Pesa API operator
+   */
+  public addInitiatorName(initiatorName: string): DarajaBuilder {
+    if (!initiatorName) {
+      throw new DarajaConfigError(ERROR_NO_INITIATOR_NAME);
+    }
+    if (this.initiatorName) {
+      throw new DarajaConfigError(ERROR_INITIATOR_NAME_OVERRIDE);
+    }
+    this.initiatorName = initiatorName;
+    return this;
+  }
+
+  /**
+   *
+   * Add the initiator password
+   * @param {string} initiatorPassword - The password of the API initiator
+   */
+  public addInitiatorPassword(initiatorPassword: string): DarajaBuilder {
+    if (!initiatorPassword) {
+      throw new DarajaConfigError(ERROR_NO_INITIATOR_PASSWORD);
+    }
+    if (this.initiatorPassword) {
+      throw new DarajaConfigError(ERROR_INITIATOR_PASSWORD_OVERRIDE);
+    }
+    this.initiatorPassword = initiatorPassword;
+    return this;
+  }
+
+  /**
+   *
+   * Add the result url
+   * @param {string} B2CResultURL - The URL that will be used by M-Pesa to send
+   * a notification upon processing of the payment request
+   */
+  public addB2CResultURL(B2CResultURL: string): DarajaBuilder {
+    if (!B2CResultURL) {
+      throw new DarajaConfigError(ERROR_NO_B2C_RESULT_URL);
+    }
+    if (this.B2CResultURL) {
+      throw new DarajaConfigError(ERROR_B2C_RESULT_URL_OVERRIDE);
+    }
+    this.B2CResultURL = B2CResultURL;
+    return this;
+  }
+
+  /**
+   *
+   * Add the queue timeout url
+   * @param {string} B2CQueueTimeoutURL - The URL that will be used by the API
+   * Proxy to send a notification incase the payment request is timed out while
+   * awaiting processing in the queue
+   */
+  public addB2CQueueTimeoutURL(B2CQueueTimeoutURL: string): DarajaBuilder {
+    if (!B2CQueueTimeoutURL) {
+      throw new DarajaConfigError(ERROR_NO_B2C_QUEUE_TIMEOUT_URL);
+    }
+    if (this.B2CQueueTimeoutURL) {
+      throw new DarajaConfigError(ERROR_B2C_QUEUE_TIMEOUT_URL_OVERRIDE);
+    }
+    this.B2CQueueTimeoutURL = B2CQueueTimeoutURL;
+    return this;
+  }
+
+  /**
+   *
    * Bundles all provided configuration options and creates a Daraja instance
    */
   public build(): Daraja {
@@ -104,6 +187,18 @@ export class DarajaBuilder {
     }
     if (this.LNMPasskey) {
       config.LNMPasskey = this.LNMPasskey;
+    }
+    if (this.initiatorName) {
+      config.initiatorName = this.initiatorName;
+    }
+    if (this.initiatorPassword) {
+      config.initiatorPassword = this.initiatorPassword;
+    }
+    if (this.B2CResultURL) {
+      config.B2CResultURL = this.B2CResultURL;
+    }
+    if (this.B2CQueueTimeoutURL) {
+      config.B2CQueueTimeoutURL = this.B2CQueueTimeoutURL;
     }
 
     return new Daraja(
