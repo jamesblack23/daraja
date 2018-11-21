@@ -1,63 +1,44 @@
 import { assert } from 'chai';
 import { DarajaBuilder } from '../src';
+import { Daraja } from '../src/lib/daraja';
 import {
-  DarajaConfigurationError,
-  OVERRIDE_LNM_CALLBACKURL_ERROR_MESSAGE,
-  OVERRIDE_LNM_PASSKEY_ERROR_MESSAGE
-} from '../src/errors';
+  DarajaConfigError,
+  ERROR_CALLBACK_URL_OVERRIDE,
+  ERROR_LNM_PASSKEY_OVERRIDE
+} from '../src/lib/errors';
 
 suite('DarajaBuilder', () => {
   let builder: DarajaBuilder;
 
-  beforeEach(() => {
-    builder = new DarajaBuilder(12345, 'key', 'secret');
+  suiteSetup(() => {
+    builder = new DarajaBuilder(12345, 'consumerKey', 'consumerSecret');
   });
 
   suite('addLNMPasskey()', () => {
-    let builderLNMPasskey: DarajaBuilder;
-
-    beforeEach(() => {
-      builderLNMPasskey = builder.addLNMPasskey('passkey');
-    });
-
-    test('should set the LNMPasskey property', () => {
-      assert.propertyVal(
-        builderLNMPasskey,
-        'LNMPasskey',
-        'passkey',
-        'LNMPasskey value not set'
-      );
-    });
-
-    test('should throw a DarajaConfigurationError when attempting to override previously set LNMPasskey', () => {
+    test('should throw a DarajaConfigError if LNMPasskey was already defined', () => {
+      const builderLNMPasskey = builder.addLNMPasskey('passkey');
       assert.throws(
-        () => builderLNMPasskey.addLNMPasskey('other'),
-        OVERRIDE_LNM_PASSKEY_ERROR_MESSAGE
+        () => builderLNMPasskey.addLNMPasskey('otherPasskey'),
+        DarajaConfigError,
+        ERROR_LNM_PASSKEY_OVERRIDE
       );
     });
   });
 
   suite('addLNMCallbackURL()', () => {
-    let builderLNMCallbackURL: DarajaBuilder;
-
-    beforeEach(() => {
-      builderLNMCallbackURL = builder.addLNMCallbackURL('myurl');
-    });
-
-    test('should set the LNMCallbackURL property', () => {
-      assert.propertyVal(
-        builderLNMCallbackURL,
-        'LNMCallbackURL',
-        'myurl',
-        'LNMCallbackURL value not set'
-      );
-    });
-
-    test('should throw a DarajaConfigurationError when attempting to override previously set LNMCallbackURL', () => {
+    test('should throw a DarajaConfigError if LNMCallbackURL was already defined', () => {
+      const builderLNMCallbackURL = builder.addLNMCallbackURL('callbackURL');
       assert.throws(
-        () => builderLNMCallbackURL.addLNMCallbackURL('otherurl'),
-        OVERRIDE_LNM_CALLBACKURL_ERROR_MESSAGE
+        () => builderLNMCallbackURL.addLNMCallbackURL('otherCallbackURL'),
+        DarajaConfigError,
+        ERROR_CALLBACK_URL_OVERRIDE
       );
+    });
+  });
+
+  suite('build()', () => {
+    test('should create a Daraja instance', () => {
+      assert.instanceOf(builder.build(), Daraja);
     });
   });
 });

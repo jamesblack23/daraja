@@ -5,15 +5,16 @@ import {
   ILNMQueryResponse,
   ILNMSuccessResponse
 } from './daraja-response.interface';
+
 import {
-  DarajaConfigurationError,
-  INVALID_AMOUNT_ERROR_MESSAGE,
-  INVALID_BUSINESS_SHORTCODE_ERROR_MESSAGE,
-  INVALID_CREDENTIALS_ERROR_MESSAGE,
-  INVALID_PHONE_NUMBER_ERROR_MESSAGE,
-  MPesaError,
-  NO_LNM_CALLBACK_URL_ERROR_MESSAGE,
-  NO_LNM_PASSKEY_ERROR_MESSAGE
+  DarajaConfigError,
+  ERROR_INVALID_AMOUNT,
+  ERROR_INVALID_BUSINESS_SHORTCODE,
+  ERROR_INVALID_CREDENTIALS,
+  ERROR_INVALID_PHONE_NUMBER,
+  ERROR_NO_CALLBACK_URL,
+  ERROR_NO_LNM_PASSKEY,
+  MPesaError
 } from './errors';
 import { urls } from './urls';
 
@@ -58,10 +59,10 @@ export class Daraja {
     TransactionDesc: string
   ): Promise<ILNMSuccessResponse> {
     if (!this.config.LNMCallbackURL) {
-      throw new DarajaConfigurationError(NO_LNM_CALLBACK_URL_ERROR_MESSAGE);
+      throw new DarajaConfigError(ERROR_NO_CALLBACK_URL);
     }
     if (!this.config.LNMPasskey) {
-      throw new DarajaConfigurationError(NO_LNM_PASSKEY_ERROR_MESSAGE);
+      throw new DarajaConfigError(ERROR_NO_LNM_PASSKEY);
     }
 
     const url =
@@ -96,15 +97,15 @@ export class Daraja {
       return response;
     } catch (error) {
       if (error.error.errorMessage === 'Bad Request - Invalid Amount') {
-        throw new MPesaError(INVALID_AMOUNT_ERROR_MESSAGE);
+        throw new MPesaError(ERROR_INVALID_AMOUNT);
       }
       if (error.error.errorMessage === 'Bad Request - Invalid PhoneNumber') {
-        throw new MPesaError(INVALID_PHONE_NUMBER_ERROR_MESSAGE);
+        throw new MPesaError(ERROR_INVALID_PHONE_NUMBER);
       }
       if (
         error.error.errorMessage === 'Bad Request - Invalid BusinessShortCode'
       ) {
-        throw new MPesaError(INVALID_BUSINESS_SHORTCODE_ERROR_MESSAGE);
+        throw new MPesaError(ERROR_INVALID_BUSINESS_SHORTCODE);
       }
       throw new MPesaError(error.message);
     }
@@ -120,7 +121,7 @@ export class Daraja {
     CheckoutRequestID: string
   ): Promise<ILNMQueryResponse> {
     if (!this.config.LNMPasskey) {
-      throw new DarajaConfigurationError(NO_LNM_PASSKEY_ERROR_MESSAGE);
+      throw new DarajaConfigError(ERROR_NO_LNM_PASSKEY);
     }
 
     const url =
@@ -257,7 +258,7 @@ export class Daraja {
         'seconds'
       );
     } catch (error) {
-      throw new MPesaError(INVALID_CREDENTIALS_ERROR_MESSAGE);
+      throw new MPesaError(ERROR_INVALID_CREDENTIALS);
     }
   }
 }

@@ -5,9 +5,10 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "test": " nyc --reporter=html --reporter=text mocha --ui tdd -r ts-node/register test/**/*.test.ts",
+    "test": "npm run build && mocha --ui tdd test/**/*.test.js",
+    "test:dev": "mocha --ui tdd -r ts-node/register test/**/*.test.ts",
     "coverage": "nyc report --reporter=text-lcov | coveralls",
-    "build": "tsc",
+    "build": "rimraf dist coverage .nyc_output && tsc",
     "prepare": "npm run build",
     "version": "git add -A src",
     "postversion": "git push && git push --tags"
@@ -35,9 +36,9 @@
     "@types/node": "^10.12.6",
     "@types/request-promise-native": "^1.0.15",
     "chai": "^4.2.0",
-    "chai-as-promised": "^7.1.1",
     "coveralls": "^3.0.2",
     "dotenv": "^6.1.0",
+    "eslint": "^5.9.0",
     "istanbul": "^0.4.5",
     "mocha": "^5.2.0",
     "nyc": "^13.1.0",
