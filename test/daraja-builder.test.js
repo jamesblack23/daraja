@@ -1,5 +1,5 @@
 const chai = require('chai');
-const { DarajaBuilder, Daraja } = require('../dist');
+const { DarajaBuilder } = require('../dist');
 const { DarajaConfigError } = require('../dist/lib/errors');
 const {
   MISSING_APP_SHORTCODE,
@@ -11,6 +11,8 @@ const {
 const expect = chai.expect;
 
 describe('DarajaBuilder', () => {
+  const passkey = 'passkey';
+
   describe('constructor', () => {
     it('should throw DarajaConfigError when the parameters are missing', () => {
       expect(() => new DarajaBuilder()).to.throw(
@@ -28,31 +30,27 @@ describe('DarajaBuilder', () => {
     });
   });
 
-  describe('addLipaNaMpesaPasskey()', () => {
+  describe('addLipaNaMpesaConfig()', () => {
     it('should throw DarajaConfigError when the passkey is not passed', () => {
       expect(() =>
-        new DarajaBuilder(12345, 'key', 'secret').addLipaNaMpesaPasskey()
+        new DarajaBuilder(12345, 'key', 'secret').addLipaNaMpesaConfig()
       ).to.throw(DarajaConfigError, MISSING_PASSKEY_PARAMETER);
     });
-    it('should return a DarajaBuilder instance with set passkey', () => {
+    it('should return a configured DarajaBuilder instance when successful', () => {
       expect(
-        new DarajaBuilder(12345, 'key', 'secret').addLipaNaMpesaPasskey(
-          'passkey'
-        )
-      ).to.have.property('lipaNaMpesaPasskey', 'passkey');
+        new DarajaBuilder(12345, 'key', 'secret').addLipaNaMpesaConfig(passkey)
+          .config.lipaNaMpesa
+      ).to.have.property(passkey, passkey);
     });
   });
 
   describe('build()', () => {
     it('should return a configured Daraja instance', () => {
       expect(
-        new DarajaBuilder(12345, 'key', 'secret').build()
-      ).to.be.an.instanceOf(Daraja);
-      expect(
         new DarajaBuilder(12345, 'key', 'secret')
-          .addLipaNaMpesaPasskey('passkey')
-          .build().config
-      ).to.have.property('lipaNaMpesaPasskey', 'passkey');
+          .addLipaNaMpesaConfig(passkey)
+          .build().config.lipaNaMpesa
+      ).to.have.property(passkey, passkey);
     });
   });
 });

@@ -9,7 +9,7 @@ import {
 } from './errors/constants';
 
 export class DarajaBuilder {
-  private lipaNaMpesaPasskey: string | null = null;
+  private config: Partial<IDarajaConfig>;
   /**
    * Creates an instance of DarajaBuilder.
    * @param {number} shortcode - the business shortcode
@@ -23,7 +23,7 @@ export class DarajaBuilder {
     private shortcode: number,
     private consumerKey: string,
     private consumerSecret: string,
-    private environment: 'production' | 'sandbox' = 'sandbox'
+    environment: 'production' | 'sandbox' = 'sandbox'
   ) {
     if (!shortcode) {
       throw new DarajaConfigError(MISSING_APP_SHORTCODE);
@@ -34,35 +34,40 @@ export class DarajaBuilder {
     if (!consumerSecret) {
       throw new DarajaConfigError(MISSING_APP_CONSUMER_SECRET);
     }
+    this.config = { environment };
   }
 
   /**
    *
    *
    * Adds the Lipa Na M-Pesa Online Passkey to the configuration
-   * @param {string} lipaNaMpesaPasskey - the app's Lipa Na M-Pesa Online
+   * @param {string} passkey - the app's Lipa Na M-Pesa Online
    * Passkey
    * @returns {DarajaBuilder}
    * @memberof DarajaBuilder
    */
-  public addLipaNaMpesaPasskey(lipaNaMpesaPasskey: string): DarajaBuilder {
-    if (!lipaNaMpesaPasskey) {
+  public addLipaNaMpesaConfig(
+    passkey: string,
+    transactionType:
+      | 'CustomerPayBillOnline'
+      | 'CustomerBuyGoodsOnline' = 'CustomerPayBillOnline'
+  ): DarajaBuilder {
+    if (!passkey) {
       throw new DarajaConfigError(MISSING_PASSKEY_PARAMETER);
     }
-    this.lipaNaMpesaPasskey = lipaNaMpesaPasskey;
+    this.config = {
+      ...this.config,
+      lipaNaMpesa: { passkey, transactionType }
+    };
     return this;
   }
 
   public build() {
-    let config: Partial<IDarajaConfig> = { environment: this.environment };
-    if (this.lipaNaMpesaPasskey) {
-      config = { ...config, lipaNaMpesaPasskey: this.lipaNaMpesaPasskey };
-    }
     return new Daraja(
       this.shortcode,
       this.consumerKey,
       this.consumerSecret,
-      config
+      this.config
     );
   }
 }
