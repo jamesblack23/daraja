@@ -1,13 +1,13 @@
-export class DarajaConfigError extends Error {
+export class DarajaError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = 'DarajaConfigError';
+    this.name = 'DarajaError';
   }
 }
 
-export class MpesaCredentialsError extends Error {
+export class MpesaError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = 'MpesaCredentialsError';
+    this.name = 'MpesaError';
   }
 }

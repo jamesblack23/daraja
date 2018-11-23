@@ -1,2 +1,2 @@
 export { DarajaBuilder } from './lib/daraja-builder';
-export { Daraja } from './lib/daraja';
+export { Mpesa } from './lib/mpesa';

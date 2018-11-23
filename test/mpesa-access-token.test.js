@@ -5,7 +5,7 @@ const {
   consumerSecret
 } = require('./config');
 const { DarajaBuilder } = require('../dist');
-const { MpesaCredentialsError } = require('../dist/lib/errors');
+const { MpesaError } = require('../dist/lib/errors');
 
 chai.use(require('chai-as-promised'));
 const expect = chai.expect;
@@ -21,23 +21,23 @@ describe('setAccessToken()', () => {
     ).build();
   });
 
-  it('should throw MpesaCredentialsError when credentials are invalid', () =>
+  it('should throw MpesaError when credentials are invalid', () =>
     expect(
       new DarajaBuilder(lipaNaMpesaShortcode, 'key', 'secret')
         .build()
         .setAccessToken()
     ).to.eventually.be.rejectedWith(
-      MpesaCredentialsError,
+      MpesaError,
       'Bad Request: Invalid Credentials'
     ));
 
-  it('should throw MpesaCredentialsError when environment is wrong', () =>
+  it('should throw MpesaError when environment is wrong', () =>
     expect(
       new DarajaBuilder(lipaNaMpesaShortcode, 'key', 'secret', 'production')
         .build()
         .setAccessToken()
     ).to.eventually.be.rejectedWith(
-      MpesaCredentialsError,
+      MpesaError,
       'Bad Request: Invalid Credentials'
     ));
 
