@@ -4,5 +4,10 @@ export interface IDarajaConfig {
     passkey: string | null;
     transactionType: 'CustomerPayBillOnline' | 'CustomerBuyGoodsOnline';
   };
-  urls: { C2BRegisterUrls: string; mpesaExpress: string; oAuth: string };
+  urls: {
+    C2BRegisterUrls: string;
+    mpesaExpress: string;
+    oAuth: string;
+    C2BSimulateTransaction?: string;
+  };
 }

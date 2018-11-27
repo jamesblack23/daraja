@@ -3,8 +3,10 @@ import * as request from 'request-promise-native';
 import { IDarajaConfig } from './config.interface';
 import { DarajaError, MpesaError } from './errors';
 import {
+  INVALID_SIMULATION_ENVIRONMENT,
   MISSING_ACCOUNT_REFERENCE_PARAMETER,
   MISSING_AMOUNT_PARAMETER,
+  MISSING_BILL_REFERENCE_NUMBER_PARAMETER,
   MISSING_CALLBACK_URL_PARAMETER,
   MISSING_CONFIRMATION_URL_PARAMETER,
   MISSING_PASSKEY_CONFIG,
@@ -154,6 +156,56 @@ export class Mpesa {
         json: true
       });
 
+      return response.ResponseDescription;
+    } catch (error) {
+      throw new MpesaError(error.message);
+    }
+  }
+
+  /**
+   *
+   *
+   * simulate a payment made from the client phone's STK/SIM Toolkit menu
+   * @param {number} amount - the amount being transacted
+   * @param {number} sender - the phone number initiating the C2B transaction
+   * @param {string} billReferenceNumber - a unique bill identifier, e.g an
+   * Account Number
+   */
+  public async C2BSimulateTransaction(
+    amount: number,
+    sender: number,
+    billReferenceNumber: string
+  ) {
+    if (!this.config.urls.C2BSimulateTransaction) {
+      throw new DarajaError(INVALID_SIMULATION_ENVIRONMENT);
+    }
+    if (!amount) {
+      throw new DarajaError(MISSING_AMOUNT_PARAMETER);
+    }
+    if (!sender) {
+      throw new DarajaError(MISSING_SENDER_PARAMETER);
+    }
+    if (!billReferenceNumber) {
+      throw new DarajaError(MISSING_BILL_REFERENCE_NUMBER_PARAMETER);
+    }
+    try {
+      if (moment().isAfter(this.accessTokenExpiry.subtract(1, 'minute'))) {
+        await this.setAccessToken();
+      }
+      const response = await request.post(
+        this.config.urls.C2BSimulateTransaction,
+        {
+          body: {
+            Amount: amount,
+            BillRefNumber: billReferenceNumber,
+            CommandID: 'CustomerPayBillOnline',
+            Msisdn: sender,
+            ShortCode: this.shortcode
+          },
+          headers: { Authorization: `Bearer ${this.accessToken}` },
+          json: true
+        }
+      );
       return response.ResponseDescription;
     } catch (error) {
       throw new MpesaError(error.message);

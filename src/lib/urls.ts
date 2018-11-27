@@ -6,6 +6,8 @@ export const urls = {
   },
   sandbox: {
     C2BRegisterUrls: 'https://sandbox.safaricom.co.ke/mpesa/c2b/v1/registerurl',
+    C2BSimulateTransaction:
+      'https://sandbox.safaricom.co.ke/mpesa/c2b/v1/simulate',
     mpesaExpress:
       'https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest',
     oAuth: 'https://sandbox.safaricom.co.ke/oauth/v1/generate'

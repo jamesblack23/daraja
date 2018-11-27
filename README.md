@@ -130,6 +130,24 @@ Returns a `Promise` which resolves to a `string` value for `ResponseDescription`
 
 Throws `MPesaError` when something goes wrong
 
+#### Simulate C2B Transaction
+
+Simulate a payment made from the client phone's STK/SIM Toolkit menu
+
+```javascript
+daraja.C2BSimulateTransaction(amount, sender, billReferenceNumber);
+```
+
+- `amount`: `number` (required) - the amount being transacted
+- `sender`: `number` (required) - the phone number initiating the C2B
+  transaction
+- `billReferenceNumber`: `string` (required) - a unique bill identifier, e.g an
+  Account Number
+
+Returns a `Promise` which resolves to a `string` value for `ResponseDescription`
+
+Throws `MPesaError` when something goes wrong
+
 ## Install
 
 With [Node](https://nodejs.org/en/) & [npm](https://npmjs.org/) installed, run

@@ -4,6 +4,7 @@ module.exports = {
   businessShortcode: parseInt(process.env.BUSINESS_SHORTCODE),
   consumerKey: process.env.CONSUMER_KEY,
   consumerSecret: process.env.CONSUMER_SECRET,
+  testPhoneNumber: parseInt(process.env.TEST_MSISDN),
   lipaNaMpesa: {
     shortcode: parseInt(process.env.LNM_SHORTCODE),
     passkey: process.env.LNM_PASSKEY,

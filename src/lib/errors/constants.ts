@@ -17,5 +17,9 @@ export const MISSING_VALIDATION_URL_PARAMETER =
   'missing validationUrl parameter';
 export const MISSING_CONFIRMATION_URL_PARAMETER =
   'missing confirmationUrl parameter';
+export const MISSING_BILL_REFERENCE_NUMBER_PARAMETER =
+  'missing billRefereneNumber parameter';
 
 export const INVALID_APP_CREDENTIALS = 'Bad Request: Invalid Credentials';
+export const INVALID_SIMULATION_ENVIRONMENT =
+  'Cannot simulate C2B transaction on production environment';
