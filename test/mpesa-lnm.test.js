@@ -1,9 +1,9 @@
 const chai = require('chai');
-const sinon = require('sinon');
+const chaiAsPromised = require('chai-as-promised');
 const {
   consumerKey,
   consumerSecret,
-  lipaNaMpesa: { shortcode, passkey, phoneNumber, callbackUrl }
+  lipaNaMpesa: { callbackUrl, passkey, phoneNumber, shortcode }
 } = require('./config');
 const { DarajaBuilder } = require('../dist');
 const { DarajaError, MpesaError } = require('../dist/lib/errors');
@@ -18,24 +18,30 @@ const {
   MISSING_LIPA_NA_MPESA_CONFIG
 } = require('../dist/lib/errors/constants');
 
-chai.use(require('chai-as-promised'));
+chai.use(chaiAsPromised);
 const expect = chai.expect;
 
 describe('lipaNaMpesaRequest()', function() {
   this.timeout(0);
 
-  let mpesa;
+  let mpesa, mpesa2;
 
-  beforeEach(() => {
+  before(() => {
     mpesa = new DarajaBuilder(shortcode, consumerKey, consumerSecret)
       .addLipaNaMpesaConfig(passkey)
       .build();
   });
 
+  this.beforeEach(() => {
+    mpesa2 = new DarajaBuilder(shortcode, consumerKey, consumerSecret)
+      .addLipaNaMpesaConfig(passkey)
+      .build();
+  });
+
   it('should throw MpesaError when credentials are invalid', () => {
-    mpesa.consumerKey = 'key';
+    mpesa2.consumerKey = 'key';
     return expect(
-      mpesa.lipaNaMpesaRequest(
+      mpesa2.lipaNaMpesaRequest(
         1,
         phoneNumber,
         shortcode,
@@ -47,9 +53,9 @@ describe('lipaNaMpesaRequest()', function() {
   });
 
   it('should throw DarajaError when lipa na mpesa is missing in the configuration', () => {
-    mpesa.config.lipaNaMpesa = undefined;
+    mpesa2.config.lipaNaMpesa = undefined;
     return expect(
-      mpesa.lipaNaMpesaRequest(
+      mpesa2.lipaNaMpesaRequest(
         1,
         phoneNumber,
         shortcode,
@@ -60,35 +66,35 @@ describe('lipaNaMpesaRequest()', function() {
     ).to.eventually.be.rejectedWith(DarajaError, MISSING_LIPA_NA_MPESA_CONFIG);
   });
 
-  it('should throw MpesaError when amount parameter is missing', () =>
+  it('should throw DarajaError when amount parameter is missing', () =>
     expect(mpesa.lipaNaMpesaRequest()).to.eventually.be.rejectedWith(
       DarajaError,
       MISSING_AMOUNT_PARAMETER
     ));
-  it('should throw MpesaError when sender parameter is missing', () =>
+  it('should throw DarajaError when sender parameter is missing', () =>
     expect(mpesa.lipaNaMpesaRequest(1)).to.eventually.be.rejectedWith(
       DarajaError,
       MISSING_SENDER_PARAMETER
     ));
-  it('should throw MpesaError when recipient parameter is missing', () =>
+  it('should throw DarajaError when recipient parameter is missing', () =>
     expect(
       mpesa.lipaNaMpesaRequest(1, phoneNumber)
     ).to.eventually.be.rejectedWith(DarajaError, MISSING_RECIPIENT_PARAMETER));
-  it('should throw MpesaError when callbackUrl parameter is missing', () =>
+  it('should throw DarajaError when callbackUrl parameter is missing', () =>
     expect(
       mpesa.lipaNaMpesaRequest(1, phoneNumber, shortcode)
     ).to.eventually.be.rejectedWith(
       DarajaError,
       MISSING_CALLBACK_URL_PARAMETER
     ));
-  it('should throw MpesaError when accountReference parameter is missing', () =>
+  it('should throw DarajaError when accountReference parameter is missing', () =>
     expect(
       mpesa.lipaNaMpesaRequest(1, phoneNumber, shortcode, callbackUrl)
     ).to.eventually.be.rejectedWith(
       DarajaError,
       MISSING_ACCOUNT_REFERENCE_PARAMETER
     ));
-  it('should throw MpesaError when transactionDescription parameter is missing', () =>
+  it('should throw DarajaError when transactionDescription parameter is missing', () =>
     expect(
       mpesa.lipaNaMpesaRequest(
         1,
@@ -101,30 +107,15 @@ describe('lipaNaMpesaRequest()', function() {
       DarajaError,
       MISSING_TRANSACTION_DESCRIPTION_PARAMETER
     ));
-  it('should return a string if all parameters are passed', async () => {
-    const spy = sinon.spy(mpesa, 'setAccessToken');
-    const response = await mpesa.lipaNaMpesaRequest(
-      1,
-      phoneNumber,
-      shortcode,
-      callbackUrl,
-      'test account',
-      'test description'
-    );
-    expect(response).to.be.a('string');
-    mpesa.config.environment = 'production';
-    try {
-      await mpesa.lipaNaMpesaRequest(
+  it('should return a string if all parameters are passed', () =>
+    expect(
+      mpesa.lipaNaMpesaRequest(
         1,
         phoneNumber,
         shortcode,
         callbackUrl,
-        'test account',
-        'test description'
-      );
-    } catch (error) {
-      expect(error).to.exist;
-    }
-    expect(spy.calledOnce).to.be.true;
-  });
+        'Account Ref',
+        'Transaction Desc'
+      )
+    ).to.eventually.be.a('string'));
 });

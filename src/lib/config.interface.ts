@@ -6,9 +6,10 @@ export interface IDarajaConfig {
   };
   b2c?: { initiatorName: string; securityCredential: string };
   urls: {
-    C2BRegisterUrls: string;
+    c2bRegisterUrls: string;
     mpesaExpress: string;
     oAuth: string;
-    C2BSimulateTransaction?: string;
+    c2bSimulateTransaction?: string;
+    b2c: string;
   };
 }

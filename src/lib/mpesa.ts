@@ -6,12 +6,18 @@ import {
   INVALID_SIMULATION_ENVIRONMENT,
   MISSING_ACCOUNT_REFERENCE_PARAMETER,
   MISSING_AMOUNT_PARAMETER,
+  MISSING_B2C_CONFIG,
   MISSING_BILL_REFERENCE_NUMBER_PARAMETER,
   MISSING_CALLBACK_URL_PARAMETER,
+  MISSING_COMMAND_ID_PARAMETER,
   MISSING_CONFIRMATION_URL_PARAMETER,
   MISSING_LIPA_NA_MPESA_CONFIG,
+  MISSING_OCCASSION_PARAMETER,
   MISSING_RECIPIENT_PARAMETER,
+  MISSING_REMARKS_PARAMETER,
+  MISSING_RESULT_URL_PARAMETER,
   MISSING_SENDER_PARAMETER,
+  MISSING_TIMEOUT_URL_PARAMETER,
   MISSING_TRANSACTION_DESCRIPTION_PARAMETER,
   MISSING_VALIDATION_URL_PARAMETER
 } from './errors/constants';
@@ -89,9 +95,7 @@ export class Mpesa {
     }
 
     try {
-      if (moment().isAfter(this.accessTokenExpiry.subtract(1, 'minute'))) {
-        await this.setAccessToken();
-      }
+      await this.setAccessToken();
       const timestamp = moment().format('YYYYMMDDHHmmss');
       const response = await request.post(this.config.urls.mpesaExpress, {
         body: {
@@ -128,7 +132,7 @@ export class Mpesa {
    * @param {('Canceled' | 'Completed')} [responseType='Completed'] - specifies
    * what is to happen if for any reason the validation URL is nor reachable
    */
-  public async C2BRegisterUrls(
+  public async c2bRegisterUrls(
     validationUrl: string,
     confirmationUrl: string,
     responseType: 'Canceled' | 'Completed' = 'Completed'
@@ -141,10 +145,8 @@ export class Mpesa {
     }
 
     try {
-      if (moment().isAfter(this.accessTokenExpiry.subtract(1, 'minute'))) {
-        await this.setAccessToken();
-      }
-      const response = await request.post(this.config.urls.C2BRegisterUrls, {
+      await this.setAccessToken();
+      const response = await request.post(this.config.urls.c2bRegisterUrls, {
         body: {
           ConfirmationURL: confirmationUrl,
           ResponseType: responseType,
@@ -170,12 +172,12 @@ export class Mpesa {
    * @param {string} billReferenceNumber - a unique bill identifier, e.g an
    * Account Number
    */
-  public async C2BSimulateTransaction(
+  public async c2bSimulateTransaction(
     amount: number,
     sender: number,
     billReferenceNumber: string
   ) {
-    if (!this.config.urls.C2BSimulateTransaction) {
+    if (!this.config.urls.c2bSimulateTransaction) {
       throw new DarajaError(INVALID_SIMULATION_ENVIRONMENT);
     }
     if (!amount) {
@@ -188,11 +190,9 @@ export class Mpesa {
       throw new DarajaError(MISSING_BILL_REFERENCE_NUMBER_PARAMETER);
     }
     try {
-      if (moment().isAfter(this.accessTokenExpiry.subtract(1, 'minute'))) {
-        await this.setAccessToken();
-      }
+      await this.setAccessToken();
       const response = await request.post(
-        this.config.urls.C2BSimulateTransaction,
+        this.config.urls.c2bSimulateTransaction,
         {
           body: {
             Amount: amount,
@@ -211,7 +211,87 @@ export class Mpesa {
     }
   }
 
+  /**
+   *
+   *
+   * transact between an M-Pesa short code to a phone number registered on M-Pesa
+   * @param {number} amount - the amount of money being sent to the customer
+   * @param {number} recipient - the customer mobile number  to receive the
+   * amount
+   * @param {('SalaryPayment' | 'BusinessPayment' | 'PromotionPayment')} commandID
+   *  - a unique command that specifies B2C transaction type
+   * @param {string} resultUrl - the URL to be specified in your request that
+   * will be used by M-Pesa to send notification upon processing of the payment
+   * request
+   * @param {string} timeoutUrl - the URL to be specified in your request that
+   * will be used by API Proxy to send notification incase the payment request
+   * is timed out while awaiting processing in the queue
+   * @param {string} remarks - any additional information to be associated with
+   * the transaction
+   * @param {string} occassion - any additional information to be associated
+   * with the transaction
+   */
+  public async b2cPaymentRequest(
+    amount: number,
+    recipient: number,
+    commandID: 'SalaryPayment' | 'BusinessPayment' | 'PromotionPayment',
+    resultUrl: string,
+    timeoutUrl: string,
+    remarks: string,
+    occassion: string
+  ) {
+    if (!this.config.b2c) {
+      throw new DarajaError(MISSING_B2C_CONFIG);
+    }
+    if (!amount) {
+      throw new DarajaError(MISSING_AMOUNT_PARAMETER);
+    }
+    if (!recipient) {
+      throw new DarajaError(MISSING_RECIPIENT_PARAMETER);
+    }
+    if (!commandID) {
+      throw new DarajaError(MISSING_COMMAND_ID_PARAMETER);
+    }
+    if (!resultUrl) {
+      throw new DarajaError(MISSING_RESULT_URL_PARAMETER);
+    }
+    if (!timeoutUrl) {
+      throw new DarajaError(MISSING_TIMEOUT_URL_PARAMETER);
+    }
+    if (!remarks) {
+      throw new DarajaError(MISSING_REMARKS_PARAMETER);
+    }
+    if (!occassion) {
+      throw new DarajaError(MISSING_OCCASSION_PARAMETER);
+    }
+    try {
+      await this.setAccessToken();
+      const response = await request.post(this.config.urls.b2c, {
+        body: {
+          Amount: amount,
+          CommandID: commandID,
+          InitiatorName: this.config.b2c.initiatorName,
+          Occassion: occassion,
+          PartyA: this.shortcode,
+          PartyB: recipient,
+          QueueTimeOutURL: timeoutUrl,
+          Remarks: remarks,
+          ResultURL: resultUrl,
+          SecurityCredential: this.config.b2c.securityCredential
+        },
+        headers: { Authorization: `Bearer ${this.accessToken}` },
+        json: true
+      });
+      return response.ResponseDescription;
+    } catch (error) {
+      throw new MpesaError(error.message);
+    }
+  }
+
   private async setAccessToken() {
+    if (moment().isBefore(this.accessTokenExpiry.subtract(1, 'minute'))) {
+      return;
+    }
     try {
       const response = await request.get(this.config.urls.oAuth, {
         auth: { user: this.consumerKey, pass: this.consumerSecret },

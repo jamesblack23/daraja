@@ -1,5 +1,4 @@
 const chai = require('chai');
-const sinon = require('sinon');
 const { DarajaBuilder } = require('../dist');
 const { DarajaError } = require('../dist/lib/errors');
 const {
@@ -77,7 +76,6 @@ describe('DarajaBuilder', () => {
       ).to.throw(DarajaError, MISSING_INITIATOR_PASSWORD_PARAMETER);
     });
     it('should return a configured DarajaBuilder instance when successful', () => {
-      const spy = sinon.spy(DarajaBuilder, 'generateSecurityCredential');
       const builder = new DarajaBuilder(12345, 'key', 'secret').addB2CConfig(
         initiatorName,
         initiatorPassword
@@ -88,7 +86,6 @@ describe('DarajaBuilder', () => {
         'initiatorName is not set on b2c config'
       );
       expect(builder.config.b2c).to.have.property('securityCredential');
-      expect(spy.calledOnceWith(initiatorPassword)).to.be.true;
     });
   });
 

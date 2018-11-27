@@ -1,21 +1,18 @@
 const chai = require('chai');
-const {
-  businessShortcode,
-  consumerKey,
-  consumerSecret
-} = require('./config');
+const chaiAsPromised = require('chai-as-promised');
+const { businessShortcode, consumerKey, consumerSecret } = require('./config');
 const { DarajaBuilder } = require('../dist');
 const { MpesaError } = require('../dist/lib/errors');
 
-chai.use(require('chai-as-promised'));
+chai.use(chaiAsPromised);
 const expect = chai.expect;
 
 describe('setAccessToken()', function() {
   this.timeout(0);
-  
+
   let mpesa;
 
-  beforeEach(() => {
+  before(() => {
     mpesa = new DarajaBuilder(
       businessShortcode,
       consumerKey,
@@ -28,26 +25,17 @@ describe('setAccessToken()', function() {
       new DarajaBuilder(businessShortcode, 'key', 'secret')
         .build()
         .setAccessToken()
-    ).to.eventually.be.rejectedWith(
-      MpesaError,
-      'Bad Request: Invalid Credentials'
-    ));
+    ).to.eventually.be.rejectedWith(MpesaError));
 
-  it('should throw MpesaError when environment is wrong', () =>
-    expect(
-      new DarajaBuilder(businessShortcode, 'key', 'secret', 'production')
-        .build()
-        .setAccessToken()
-    ).to.eventually.be.rejectedWith(
-      MpesaError,
-      'Bad Request: Invalid Credentials'
-    ));
-
-  it('should set the access token and expiry date when credentials are valid', async () => {
+  it('should set the access token when credentials are valid', async () => {
     const oldToken = mpesa.accessToken;
-    const oldTokenExpiry = mpesa.accessTokenExpiry;
     await mpesa.setAccessToken();
     expect(mpesa.accessToken).to.not.equal(oldToken);
-    expect(mpesa.accessTokenExpiry.isAfter(oldTokenExpiry)).to.be.true;
+  });
+
+  it('should not set new token when current token has not expired', async () => {
+    const oldToken = mpesa.accessToken;
+    await mpesa.setAccessToken();
+    expect(mpesa.accessToken).to.equal(oldToken);
   });
 });

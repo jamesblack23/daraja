@@ -81,8 +81,8 @@ const daraja = darajaBuilder
 
 #### Lipa Na M-Pesa Online Request
 
-Initiate an online payment on behalf of a customer. Activates an STK push to the
-customer prompting them to enter their correct M-Pesa PIN to complete the
+Initiate an online payment on behalf of a customer. Activates an STK push to
+the customer prompting them to enter their correct M-Pesa PIN to complete the
 transaction.
 
 ```javascript
@@ -110,10 +110,8 @@ daraja.lipaNaMpesaRequest(
   information/comment that can be sent along with the request from your system.
   Maximum of 13 Characters
 
-Returns a `Promise` which resolves to a `string` value for the
-`CheckoutRequestID`
-
-Throws an `MPesaError` when something goes wrong
+Returns a `Promise<string>` that resolves to the transaction's
+`CheckoutRequestID` or throws `MpesaError`
 
 ### C2B
 
@@ -126,7 +124,7 @@ const daraja = darajaBuilder.build();
 Register validation and confirmation URLs on M-Pesa
 
 ```javascript
-daraja.C2BRegisterURLs(validationURL, confirmationURL, responseType);
+daraja.c2bRegisterURLs(validationURL, confirmationURL, responseType);
 ```
 
 - `validationUrl`: `string` (required) - the URL that receives the validation
@@ -137,16 +135,15 @@ daraja.C2BRegisterURLs(validationURL, confirmationURL, responseType);
   (optional, defaults to `Completed`) - specifies what is to happen if for any
   reason the validation URL is not reachable.
 
-Returns a `Promise` which resolves to a `string` value for `ResponseDescription`
-
-Throws `MPesaError` when something goes wrong
+Returns a `Promise<string>` that resolves to the `ResponseDescription` or
+throws `MpesaError`
 
 #### Simulate C2B Transaction
 
 Simulate a payment made from the client phone's STK/SIM Toolkit menu
 
 ```javascript
-daraja.C2BSimulateTransaction(amount, sender, billReferenceNumber);
+daraja.c2bSimulateTransaction(amount, sender, billReferenceNumber);
 ```
 
 - `amount`: `number` (required) - the amount being transacted
@@ -155,11 +152,52 @@ daraja.C2BSimulateTransaction(amount, sender, billReferenceNumber);
 - `billReferenceNumber`: `string` (required) - a unique bill identifier, e.g an
   Account Number
 
-Returns a `Promise` which resolves to a `string` value for `ResponseDescription`
-
-Throws `MPesaError` when something goes wrong
+Returns a `Promise<string>` that resolves to the `ResponseDescription` or
+throws `MpesaError`
 
 ### B2C
+
+```javascript
+const daraja = darajaBuilder
+  .addB2CConfig(initiatorName, initiatorPassword)
+  .build();
+```
+
+#### B2C Payment Request
+
+Transact between an M-Pesa short code to a phone number registered on M-Pesa
+
+```javascript
+daraja.b2cPaymentRequest(
+  amount,
+  recipient,
+  commandID,
+  resultUrl,
+  timeoutUrl,
+  remarks,
+  occassion
+);
+```
+
+- `amount`: `number` (required) - the amount of money being sent to the
+  customer
+- `recipient`: `number` (required) - the customer mobile number to receive the
+  amount
+- `commandID`: `('SalaryPayment' | 'BusinessPayment' | 'PromotionPayment')`
+  (required) - a unique command that specifies B2C transaction type
+- `resultUrl`: `string` (required) - the URL to be specified in your request
+  that will be used by M-Pesa to send notification upon processing of the
+  payment request
+- `timeoutUrl`: `string` (required) - the URL to be specified in your request
+  that will be used by API Proxy to send notification incase the payment
+  request is timed out while awaiting processing in the queue
+- `remarks`: `remarks` (required) - any additional information to be associated
+  with the transaction
+- `occassion`: `string` (required) - any additional information to be
+  associated with the transaction
+
+Returns a `Promise<string>` that resolves to the `ResponseDescription` or
+throws `MpesaError`
 
 ## Install
 
