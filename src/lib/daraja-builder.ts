@@ -1,116 +1,134 @@
-import { Daraja } from './daraja';
-import { IDarajaConfig } from './daraja-config.interface';
+import * as constants from 'constants';
+import * as crypto from 'crypto';
+import * as fs from 'fs';
+import * as path from 'path';
+import { IDarajaConfig } from './config.interface';
+import { DarajaError } from './errors';
 import {
-  DarajaConfigError,
-  ERROR_CALLBACK_URL_OVERRIDE,
-  ERROR_INVALID_ENVIRONMENT,
-  ERROR_LNM_PASSKEY_OVERRIDE,
-  ERROR_MISSING_CONSUMER_KEY,
-  ERROR_MISSING_CONSUMER_SECRET,
-  ERROR_MISSING_SHORTCODE,
-  ERROR_NO_CALLBACK_URL,
-  ERROR_NO_LNM_PASSKEY
-} from './errors';
+  MISSING_APP_CONSUMER_KEY,
+  MISSING_APP_CONSUMER_SECRET,
+  MISSING_APP_SHORTCODE,
+  MISSING_INITIATOR_NAME_PARAMETER,
+  MISSING_INITIATOR_PASSWORD_PARAMETER,
+  MISSING_PASSKEY_PARAMETER
+} from './errors/constants';
+import { Mpesa } from './mpesa';
 
 export class DarajaBuilder {
-  private shortcode: number;
-  private consumerKey: string;
-  private consumerSecret: string;
-  private environment: 'sandbox' | 'production';
-
-  private LNMPasskey: string | null;
-  private LNMCallbackURL: string | null;
+  private static generateSecurityCredential(
+    password: string,
+    environment: 'production' | 'sandbox' = 'sandbox'
+  ): string {
+    return crypto
+      .publicEncrypt(
+        {
+          key: fs.readFileSync(
+            path.join(
+              __dirname,
+              '../../certificates',
+              environment === 'production' ? 'production.cer' : 'sandbox.cer'
+            ),
+            { encoding: 'utf8' }
+          ),
+          padding: constants.RSA_PKCS1_PADDING
+        },
+        Buffer.from(password)
+      )
+      .toString('base64');
+  }
+  private config: Partial<IDarajaConfig>;
 
   /**
    * Creates an instance of DarajaBuilder.
-   * @param {number} shortcode - This is the organization's shortcode
-   * (Paybill or Buygoods - A 5 to 6 digit account number) used to identify an organization
-   * @param {string} consumerKey - Your App's Consumer Key (obtain from Developer's portal)
-   * @param {string} consumerSecret - Your App's Consumer Secret (obtain from Developer's portal)
-   * @param {string} environment - The environment to run Daraja. Can be either
-   * 'sandbox' or 'production'. Defaults to 'sandbox'
+   * @param {number} shortcode - the business shortcode
+   * @param {string} consumerKey - the application's Consumer Key
+   * @param {string} consumerSecret - the appliaction's Consumer Secret
+   * @param {('production' | 'sandbox')} [environment='sandbox'] - the
+   * environment to run Daraja in
    */
   constructor(
-    shortcode: number,
-    consumerKey: string,
-    consumerSecret: string,
-    environment: 'sandbox' | 'production' = 'sandbox'
+    private shortcode: number,
+    private consumerKey: string,
+    private consumerSecret: string,
+    environment: 'production' | 'sandbox' = 'sandbox'
   ) {
     if (!shortcode) {
-      throw new DarajaConfigError(ERROR_MISSING_SHORTCODE);
+      throw new DarajaError(MISSING_APP_SHORTCODE);
     }
     if (!consumerKey) {
-      throw new DarajaConfigError(ERROR_MISSING_CONSUMER_KEY);
+      throw new DarajaError(MISSING_APP_CONSUMER_KEY);
     }
     if (!consumerSecret) {
-      throw new DarajaConfigError(ERROR_MISSING_CONSUMER_SECRET);
+      throw new DarajaError(MISSING_APP_CONSUMER_SECRET);
     }
-    if (environment !== 'sandbox' && environment !== 'production') {
-      throw new DarajaConfigError(ERROR_INVALID_ENVIRONMENT);
-    }
-
-    this.shortcode = shortcode;
-    this.consumerKey = consumerKey;
-    this.consumerSecret = consumerSecret;
-    this.environment = environment;
-
-    this.LNMPasskey = null;
-    this.LNMCallbackURL = null;
+    this.config = { environment };
   }
 
   /**
    *
-   * Adds the Lipa na M-Pesa Passkey to the configuration.
-   * @param {string} LNMPasskey - The Lipa na M-Pesa Online Passkey
+   *
+   * adds Lipa Na M-Pesa to the configuration
+   * @param {string} passkey - the app's Lipa Na M-Pesa Online Passkey
+   * @param {('CustomerPayBillOnline'| 'CustomerBuyGoodsOnline')}
+   * [transactionType='CustomerPayBillOnline'] - the transaction type that is
+   * used to identify the transaction when sending the request to M-Pesa
    */
-  public addLNMPasskey(LNMPasskey: string): DarajaBuilder {
-    if (!LNMPasskey) {
-      throw new DarajaConfigError(ERROR_NO_LNM_PASSKEY);
+  public addLipaNaMpesaConfig(
+    passkey: string,
+    transactionType:
+      | 'CustomerPayBillOnline'
+      | 'CustomerBuyGoodsOnline' = 'CustomerPayBillOnline'
+  ): DarajaBuilder {
+    if (!passkey) {
+      throw new DarajaError(MISSING_PASSKEY_PARAMETER);
     }
-    if (this.LNMPasskey) {
-      throw new DarajaConfigError(ERROR_LNM_PASSKEY_OVERRIDE);
-    }
-    this.LNMPasskey = LNMPasskey;
+    this.config = {
+      ...this.config,
+      lipaNaMpesa: { passkey, transactionType }
+    };
     return this;
   }
 
   /**
    *
-   * Adds the Callback URL to receive Lipa na M-Pesa Online transaction
-   * notifications
-   * @param {string} LNMCallbackURL - A valid secure URL that is used to receive notifications from M-Pesa API.
-   * It is the endpoint to which the results will be sent by M-Pesa API.
-   * @returns {DarajaBuilder}
+   *
+   * Adds B2C to the configuration
+   * @param {string} initiatorName - username of the M-Pesa B2C account API
+   * operator
+   * @param {string} initiatorPassword - password of the M-Pesa B2C account API
+   * operator
    */
-  public addLNMCallbackURL(LNMCallbackURL: string): DarajaBuilder {
-    if (!LNMCallbackURL) {
-      throw new DarajaConfigError(ERROR_NO_CALLBACK_URL);
+  public addB2CConfig(initiatorName: string, initiatorPassword: string) {
+    if (!initiatorName) {
+      throw new DarajaError(MISSING_INITIATOR_NAME_PARAMETER);
     }
-    if (this.LNMCallbackURL) {
-      throw new DarajaConfigError(ERROR_CALLBACK_URL_OVERRIDE);
+    if (!initiatorPassword) {
+      throw new DarajaError(MISSING_INITIATOR_PASSWORD_PARAMETER);
     }
-    this.LNMCallbackURL = LNMCallbackURL;
+    this.config = {
+      ...this.config,
+      b2c: {
+        initiatorName,
+        securityCredential: DarajaBuilder.generateSecurityCredential(
+          initiatorPassword,
+          this.config.environment
+        )
+      }
+    };
     return this;
   }
 
   /**
    *
-   * Bundles all provided configuration options and creates a Daraja instance
+   *
+   * Creates a configured instance of Mpesa
    */
-  public build(): Daraja {
-    const config: Partial<IDarajaConfig> = { environment: this.environment };
-    if (this.LNMCallbackURL) {
-      config.LNMCallbackURL = this.LNMCallbackURL;
-    }
-    if (this.LNMPasskey) {
-      config.LNMPasskey = this.LNMPasskey;
-    }
-
-    return new Daraja(
+  public build(): Mpesa {
+    return new Mpesa(
       this.shortcode,
       this.consumerKey,
       this.consumerSecret,
-      config
+      this.config
     );
   }
 }

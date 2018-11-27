@@ -1,14 +1,24 @@
-const dotenv = require('dotenv');
-dotenv.config();
+require('dotenv').config();
+
 module.exports = {
-  LNMShortcode: parseInt(process.env.LNM_SHORTCODE),
+  businessShortcode: parseInt(process.env.BUSINESS_SHORTCODE),
   consumerKey: process.env.CONSUMER_KEY,
   consumerSecret: process.env.CONSUMER_SECRET,
-  LNMPasskey: process.env.LNM_PASSKEY,
-  LNMCallbackURL: process.env.LNM_CALLBACK_URL,
-  LNM_MSISDN: process.env.LNM_MSISDN,
-  businessShortcode: process.env.BUSINESS_SHORTCODE,
-  C2BValidationURL: process.env.C2B_VALIDATION_URL,
-  C2BConfirmationURL: process.env.C2B_VALIDATION_URL,
-  testMSISDN: process.env.MSISDN
+  testPhoneNumber: parseInt(process.env.TEST_MSISDN),
+  initiatorName: process.env.INITIATOR_NAME,
+  initiatorPassword: process.env.INITIATOR_PASSWORD,
+  lipaNaMpesa: {
+    shortcode: parseInt(process.env.LNM_SHORTCODE),
+    passkey: process.env.LNM_PASSKEY,
+    phoneNumber: parseInt(process.env.LNM_MSISDN),
+    callbackUrl: process.env.LNM_CALLBACK_URL
+  },
+  c2b: {
+    validationUrl: process.env.C2B_VALIDATION_URL,
+    confirmationUrl: process.env.C2B_CONFIRMATION_URL
+  },
+  b2c: {
+    resultUrl: process.env.B2C_RESULT_URL,
+    timeoutUrl: process.env.B2C_TIMEOUT_URL
+  }
 };
