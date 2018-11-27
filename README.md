@@ -56,7 +56,7 @@ configured `DarajaBuilder` instance:
   configuration.
   - `passkey`: `string` (required for Lipa Na M-Pesa Online transactions) -
     the app's Lipa Na M-Pesa Online Passkey.
-  - `transactionType`: `('CustomerPayBillOnline'| 'CustomerBuyGoodsOnline')`
+  - `transactionType`: `('CustomerPayBillOnline' | 'CustomerBuyGoodsOnline')`
     (optional, defaults to `CustomerPayBillOnline`) - the transaction type that
     is used to identify the transaction when sending the request to M-Pesa
 
@@ -115,7 +115,7 @@ const daraja = darajaBuilder.build();
 Register validation and confirmation URLs on M-Pesa
 
 ```javascript
-daraja.C2BRegisterURLs(validationURL, confirmationURL, defaultResponseType);
+daraja.C2BRegisterURLs(validationURL, confirmationURL, responseType);
 ```
 
 - `validationUrl`: `string` (required) - the URL that receives the validation
