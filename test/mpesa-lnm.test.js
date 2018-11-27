@@ -1,12 +1,9 @@
 const chai = require('chai');
 const sinon = require('sinon');
 const {
-  lipaNaMpesaShortcode,
   consumerKey,
   consumerSecret,
-  passkey,
-  stkPushPhone,
-  stkCallbackUrl
+  lipaNaMpesa: { shortcode, passkey, phoneNumber, callbackUrl }
 } = require('./config');
 const { DarajaBuilder } = require('../dist');
 const { DarajaError, MpesaError } = require('../dist/lib/errors');
@@ -30,7 +27,7 @@ describe('lipaNaMpesaRequest()', function() {
   let mpesa;
 
   beforeEach(() => {
-    mpesa = new DarajaBuilder(lipaNaMpesaShortcode, consumerKey, consumerSecret)
+    mpesa = new DarajaBuilder(shortcode, consumerKey, consumerSecret)
       .addLipaNaMpesaConfig(passkey)
       .build();
   });
@@ -40,9 +37,9 @@ describe('lipaNaMpesaRequest()', function() {
     return expect(
       mpesa.lipaNaMpesaRequest(
         1,
-        stkPushPhone,
-        lipaNaMpesaShortcode,
-        stkCallbackUrl,
+        phoneNumber,
+        shortcode,
+        callbackUrl,
         'test account',
         'test description'
       )
@@ -54,9 +51,9 @@ describe('lipaNaMpesaRequest()', function() {
     return expect(
       mpesa.lipaNaMpesaRequest(
         1,
-        stkPushPhone,
-        lipaNaMpesaShortcode,
-        stkCallbackUrl,
+        phoneNumber,
+        shortcode,
+        callbackUrl,
         'test account',
         'test description'
       )
@@ -75,11 +72,11 @@ describe('lipaNaMpesaRequest()', function() {
     ));
   it('should throw MpesaError when recipient parameter is missing', () =>
     expect(
-      mpesa.lipaNaMpesaRequest(1, stkPushPhone)
+      mpesa.lipaNaMpesaRequest(1, phoneNumber)
     ).to.eventually.be.rejectedWith(DarajaError, MISSING_RECIPIENT_PARAMETER));
   it('should throw MpesaError when callbackUrl parameter is missing', () =>
     expect(
-      mpesa.lipaNaMpesaRequest(1, stkPushPhone, lipaNaMpesaShortcode)
+      mpesa.lipaNaMpesaRequest(1, phoneNumber, shortcode)
     ).to.eventually.be.rejectedWith(
       DarajaError,
       MISSING_CALLBACK_URL_PARAMETER
@@ -88,9 +85,9 @@ describe('lipaNaMpesaRequest()', function() {
     expect(
       mpesa.lipaNaMpesaRequest(
         1,
-        stkPushPhone,
-        lipaNaMpesaShortcode,
-        stkCallbackUrl
+        phoneNumber,
+        shortcode,
+        callbackUrl
       )
     ).to.eventually.be.rejectedWith(
       DarajaError,
@@ -100,9 +97,9 @@ describe('lipaNaMpesaRequest()', function() {
     expect(
       mpesa.lipaNaMpesaRequest(
         1,
-        stkPushPhone,
-        lipaNaMpesaShortcode,
-        stkCallbackUrl,
+        phoneNumber,
+        shortcode,
+        callbackUrl,
         'test account'
       )
     ).to.eventually.be.rejectedWith(
@@ -113,9 +110,9 @@ describe('lipaNaMpesaRequest()', function() {
     const spy = sinon.spy(mpesa, 'setAccessToken');
     const response = await mpesa.lipaNaMpesaRequest(
       1,
-      stkPushPhone,
-      lipaNaMpesaShortcode,
-      stkCallbackUrl,
+      phoneNumber,
+      shortcode,
+      callbackUrl,
       'test account',
       'test description'
     );
@@ -124,9 +121,9 @@ describe('lipaNaMpesaRequest()', function() {
     try {
       await mpesa.lipaNaMpesaRequest(
         1,
-        stkPushPhone,
-        lipaNaMpesaShortcode,
-        stkCallbackUrl,
+        phoneNumber,
+        shortcode,
+        callbackUrl,
         'test account',
         'test description'
       );

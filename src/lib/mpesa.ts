@@ -6,10 +6,12 @@ import {
   MISSING_ACCOUNT_REFERENCE_PARAMETER,
   MISSING_AMOUNT_PARAMETER,
   MISSING_CALLBACK_URL_PARAMETER,
+  MISSING_CONFIRMATION_URL_PARAMETER,
   MISSING_PASSKEY_CONFIG,
   MISSING_RECIPIENT_PARAMETER,
   MISSING_SENDER_PARAMETER,
-  MISSING_TRANSACTION_DESCRIPTION_PARAMETER
+  MISSING_TRANSACTION_DESCRIPTION_PARAMETER,
+  MISSING_VALIDATION_URL_PARAMETER
 } from './errors/constants';
 import { urls } from './urls';
 
@@ -18,7 +20,8 @@ export class Mpesa {
   private accessTokenExpiry: moment.Moment;
   private config: IDarajaConfig = {
     environment: 'sandbox',
-    lipaNaMpesa: { passkey: null, transactionType: 'CustomerPayBillOnline' }
+    lipaNaMpesa: { passkey: null, transactionType: 'CustomerPayBillOnline' },
+    urls: urls.sandbox
   };
 
   constructor(
@@ -27,7 +30,11 @@ export class Mpesa {
     private consumerSecret: string,
     config: Partial<IDarajaConfig>
   ) {
-    this.config = { ...this.config, ...config };
+    this.config = {
+      ...this.config,
+      ...config,
+      urls: config.environment === 'production' ? urls.production : urls.sandbox
+    };
     this.accessToken = null;
     this.accessTokenExpiry = moment();
   }
@@ -57,11 +64,6 @@ export class Mpesa {
     accountReference: string,
     transactionDescription: string
   ) {
-    const url =
-      this.config.environment === 'production'
-        ? urls.production.mpesaExpress
-        : urls.sandbox.mpesaExpress;
-
     if (!this.config.lipaNaMpesa.passkey) {
       throw new DarajaError(MISSING_PASSKEY_CONFIG);
     }
@@ -90,7 +92,7 @@ export class Mpesa {
         await this.setAccessToken();
       }
       const timestamp = moment().format('YYYYMMDDHHmmss');
-      const response = await request.post(url, {
+      const response = await request.post(this.config.urls.mpesaExpress, {
         body: {
           AccountReference: accountReference,
           Amount: amount,
@@ -115,13 +117,52 @@ export class Mpesa {
     }
   }
 
-  private async setAccessToken() {
-    const url =
-      this.config.environment === 'production'
-        ? urls.production.oAuth
-        : urls.sandbox.oAuth;
+  /**
+   *
+   * register validation and confirmation URLs on M-Pesa
+   * @param {string} validationUrl - the URL that receives the validation
+   * request from M-Pesa API upon payment submission
+   * @param {string} confirmationUrl - the URL that receives the confirmation
+   * request from M-Pesa API upon payment completion
+   * @param {('Canceled' | 'Completed')} [responseType='Completed'] - specifies
+   * what is to happen if for any reason the validation URL is nor reachable
+   */
+  public async C2BRegisterUrls(
+    validationUrl: string,
+    confirmationUrl: string,
+    responseType: 'Canceled' | 'Completed' = 'Completed'
+  ) {
+    if (!validationUrl) {
+      throw new DarajaError(MISSING_VALIDATION_URL_PARAMETER);
+    }
+    if (!confirmationUrl) {
+      throw new DarajaError(MISSING_CONFIRMATION_URL_PARAMETER);
+    }
+
     try {
-      const response = await request.get(url, {
+      if (moment().isAfter(this.accessTokenExpiry.subtract(1, 'minute'))) {
+        await this.setAccessToken();
+      }
+      const response = await request.post(this.config.urls.C2BRegisterUrls, {
+        body: {
+          ConfirmationURL: confirmationUrl,
+          ResponseType: responseType,
+          ShortCode: this.shortcode,
+          ValidationURL: validationUrl
+        },
+        headers: { Authorization: `Bearer ${this.accessToken}` },
+        json: true
+      });
+
+      return response.ResponseDescription;
+    } catch (error) {
+      throw new MpesaError(error.message);
+    }
+  }
+
+  private async setAccessToken() {
+    try {
+      const response = await request.get(this.config.urls.oAuth, {
         auth: { user: this.consumerKey, pass: this.consumerSecret },
         json: true,
         qs: { grant_type: 'client_credentials' }

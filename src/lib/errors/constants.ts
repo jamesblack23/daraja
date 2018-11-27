@@ -13,5 +13,9 @@ export const MISSING_ACCOUNT_REFERENCE_PARAMETER =
   'missing account reference parameter';
 export const MISSING_TRANSACTION_DESCRIPTION_PARAMETER =
   'missing transaction description parameter';
+export const MISSING_VALIDATION_URL_PARAMETER =
+  'missing validationUrl parameter';
+export const MISSING_CONFIRMATION_URL_PARAMETER =
+  'missing confirmationUrl parameter';
 
 export const INVALID_APP_CREDENTIALS = 'Bad Request: Invalid Credentials';

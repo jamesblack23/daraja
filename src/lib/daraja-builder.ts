@@ -18,7 +18,6 @@ export class DarajaBuilder {
    * @param {string} consumerSecret - the appliaction's Consumer Secret
    * @param {('production' | 'sandbox')} [environment='sandbox'] - the
    * environment to run Daraja in
-   * @memberof DarajaBuilder
    */
   constructor(
     private shortcode: number,
@@ -41,11 +40,11 @@ export class DarajaBuilder {
   /**
    *
    *
-   * Adds the Lipa Na M-Pesa Online Passkey to the configuration
-   * @param {string} passkey - the app's Lipa Na M-Pesa Online
-   * Passkey
-   * @returns {DarajaBuilder}
-   * @memberof DarajaBuilder
+   * adds Lipa Na M-Pesa to the configuration
+   * @param {string} passkey - the app's Lipa Na M-Pesa Online Passkey
+   * @param {('CustomerPayBillOnline'| 'CustomerBuyGoodsOnline')}
+   * [transactionType='CustomerPayBillOnline'] - the transaction type that is
+   * used to identify the transaction when sending the request to M-Pesa
    */
   public addLipaNaMpesaConfig(
     passkey: string,
