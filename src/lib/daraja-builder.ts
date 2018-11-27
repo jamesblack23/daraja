@@ -89,6 +89,15 @@ export class DarajaBuilder {
     return this;
   }
 
+  /**
+   *
+   *
+   * Adds B2C to the configuration
+   * @param {string} initiatorName - username of the M-Pesa B2C account API
+   * operator
+   * @param {string} initiatorPassword - password of the M-Pesa B2C account API
+   * operator
+   */
   public addB2CConfig(initiatorName: string, initiatorPassword: string) {
     if (!initiatorName) {
       throw new DarajaError(MISSING_INITIATOR_NAME_PARAMETER);

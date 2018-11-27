@@ -54,11 +54,22 @@ configured `DarajaBuilder` instance:
 
 - `addLipaNaMpesaConfig(passkey, transactionType)` - Adds Lipa na M-Pesa to the
   configuration.
+
   - `passkey`: `string` (required for Lipa Na M-Pesa Online transactions) -
     the app's Lipa Na M-Pesa Online Passkey.
   - `transactionType`: `('CustomerPayBillOnline' | 'CustomerBuyGoodsOnline')`
     (optional, defaults to `CustomerPayBillOnline`) - the transaction type that
     is used to identify the transaction when sending the request to M-Pesa
+
+- `addB2CConfig(initiatorName, initiatorPassword)` - Adds B2C to the
+  configuration
+  - `initiatorName`: `string` (required) - username of the M-Pesa B2C account
+    API operator
+  - `initiatorPassword`: `string` (required) - password of the M-Pesa B2C
+    account API operator
+
+After chaining all the configuration methods, you need to call `build()` to get
+the configured `Daraja` instance
 
 ### Lipa Na M-Pesa
 
@@ -147,6 +158,8 @@ daraja.C2BSimulateTransaction(amount, sender, billReferenceNumber);
 Returns a `Promise` which resolves to a `string` value for `ResponseDescription`
 
 Throws `MPesaError` when something goes wrong
+
+### B2C
 
 ## Install
 
