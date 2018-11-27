@@ -9,7 +9,7 @@ import {
   MISSING_BILL_REFERENCE_NUMBER_PARAMETER,
   MISSING_CALLBACK_URL_PARAMETER,
   MISSING_CONFIRMATION_URL_PARAMETER,
-  MISSING_PASSKEY_CONFIG,
+  MISSING_LIPA_NA_MPESA_CONFIG,
   MISSING_RECIPIENT_PARAMETER,
   MISSING_SENDER_PARAMETER,
   MISSING_TRANSACTION_DESCRIPTION_PARAMETER,
@@ -22,7 +22,6 @@ export class Mpesa {
   private accessTokenExpiry: moment.Moment;
   private config: IDarajaConfig = {
     environment: 'sandbox',
-    lipaNaMpesa: { passkey: null, transactionType: 'CustomerPayBillOnline' },
     urls: urls.sandbox
   };
 
@@ -66,8 +65,8 @@ export class Mpesa {
     accountReference: string,
     transactionDescription: string
   ) {
-    if (!this.config.lipaNaMpesa.passkey) {
-      throw new DarajaError(MISSING_PASSKEY_CONFIG);
+    if (!this.config.lipaNaMpesa) {
+      throw new DarajaError(MISSING_LIPA_NA_MPESA_CONFIG);
     }
 
     if (!amount) {

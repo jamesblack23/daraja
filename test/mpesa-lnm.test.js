@@ -15,7 +15,7 @@ const {
   MISSING_CALLBACK_URL_PARAMETER,
   MISSING_ACCOUNT_REFERENCE_PARAMETER,
   MISSING_TRANSACTION_DESCRIPTION_PARAMETER,
-  MISSING_PASSKEY_CONFIG
+  MISSING_LIPA_NA_MPESA_CONFIG
 } = require('../dist/lib/errors/constants');
 
 chai.use(require('chai-as-promised'));
@@ -46,8 +46,8 @@ describe('lipaNaMpesaRequest()', function() {
     ).to.eventually.be.rejectedWith(MpesaError, INVALID_APP_CREDENTIALS);
   });
 
-  it('should throw DarajaError when passkey is missing in the configuration', () => {
-    mpesa.config.lipaNaMpesa.passkey = null;
+  it('should throw DarajaError when lipa na mpesa is missing in the configuration', () => {
+    mpesa.config.lipaNaMpesa = undefined;
     return expect(
       mpesa.lipaNaMpesaRequest(
         1,
@@ -57,7 +57,7 @@ describe('lipaNaMpesaRequest()', function() {
         'test account',
         'test description'
       )
-    ).to.eventually.be.rejectedWith(DarajaError, MISSING_PASSKEY_CONFIG);
+    ).to.eventually.be.rejectedWith(DarajaError, MISSING_LIPA_NA_MPESA_CONFIG);
   });
 
   it('should throw MpesaError when amount parameter is missing', () =>
@@ -83,12 +83,7 @@ describe('lipaNaMpesaRequest()', function() {
     ));
   it('should throw MpesaError when accountReference parameter is missing', () =>
     expect(
-      mpesa.lipaNaMpesaRequest(
-        1,
-        phoneNumber,
-        shortcode,
-        callbackUrl
-      )
+      mpesa.lipaNaMpesaRequest(1, phoneNumber, shortcode, callbackUrl)
     ).to.eventually.be.rejectedWith(
       DarajaError,
       MISSING_ACCOUNT_REFERENCE_PARAMETER

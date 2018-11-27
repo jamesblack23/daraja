@@ -1,14 +1,41 @@
+import * as constants from 'constants';
+import * as crypto from 'crypto';
+import * as fs from 'fs';
+import * as path from 'path';
 import { IDarajaConfig } from './config.interface';
 import { DarajaError } from './errors';
 import {
   MISSING_APP_CONSUMER_KEY,
   MISSING_APP_CONSUMER_SECRET,
   MISSING_APP_SHORTCODE,
+  MISSING_INITIATOR_NAME_PARAMETER,
+  MISSING_INITIATOR_PASSWORD_PARAMETER,
   MISSING_PASSKEY_PARAMETER
 } from './errors/constants';
 import { Mpesa } from './mpesa';
 
 export class DarajaBuilder {
+  private static generateSecurityCredential(
+    password: string,
+    environment: 'production' | 'sandbox' = 'sandbox'
+  ): string {
+    return crypto
+      .publicEncrypt(
+        {
+          key: fs.readFileSync(
+            path.join(
+              __dirname,
+              '../../certificates',
+              environment === 'production' ? 'production.cer' : 'sandbox.cer'
+            ),
+            { encoding: 'utf8' }
+          ),
+          padding: constants.RSA_PKCS1_PADDING
+        },
+        Buffer.from(password)
+      )
+      .toString('base64');
+  }
   private config: Partial<IDarajaConfig>;
 
   /**
@@ -58,6 +85,26 @@ export class DarajaBuilder {
     this.config = {
       ...this.config,
       lipaNaMpesa: { passkey, transactionType }
+    };
+    return this;
+  }
+
+  public addB2CConfig(initiatorName: string, initiatorPassword: string) {
+    if (!initiatorName) {
+      throw new DarajaError(MISSING_INITIATOR_NAME_PARAMETER);
+    }
+    if (!initiatorPassword) {
+      throw new DarajaError(MISSING_INITIATOR_PASSWORD_PARAMETER);
+    }
+    this.config = {
+      ...this.config,
+      b2c: {
+        initiatorName,
+        securityCredential: DarajaBuilder.generateSecurityCredential(
+          initiatorPassword,
+          this.config.environment
+        )
+      }
     };
     return this;
   }
