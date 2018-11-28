@@ -16,10 +16,10 @@ export class Daraja {
    * @returns {Daraja}
    * @memberof Daraja
    */
-  public configureLipaNaMPesa(passkey: string, callbackUrl: string): Daraja {
-    if (arguments.length !== this.configureLipaNaMPesa.length) {
+  public configureMPesaExpress(passkey: string, callbackUrl: string): Daraja {
+    if (arguments.length !== this.configureMPesaExpress.length) {
       throw new DarajaConfigError(
-        `Expected ${this.configureLipaNaMPesa.length} arguments but got ${
+        `Expected ${this.configureMPesaExpress.length} arguments but got ${
           arguments.length
         }`
       );

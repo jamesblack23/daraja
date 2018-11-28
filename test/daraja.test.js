@@ -11,9 +11,9 @@ describe('Daraja', () => {
     daraja = new Daraja();
   });
 
-  describe('configureLipaNaMPesa()', () => {
+  describe('configureMPesaExpress()', () => {
     it('should throw an error when fewer than the required arguments are passed', () => {
-      expect(() => daraja.configureLipaNaMPesa('first')).to.throw(
+      expect(() => daraja.configureMPesaExpress('first')).to.throw(
         DarajaConfigError,
         'Expected 2 arguments but got 1'
       );
@@ -21,7 +21,7 @@ describe('Daraja', () => {
 
     it('should throw an error when more than the required arguments are passed', () => {
       expect(() =>
-        daraja.configureLipaNaMPesa('first', 'second', 'third')
+        daraja.configureMPesaExpress('first', 'second', 'third')
       ).to.throw(DarajaConfigError, 'Expected 2 arguments but got 3');
     });
 
@@ -29,7 +29,7 @@ describe('Daraja', () => {
       const passkey = 'passkey';
       const callbackUrl = 'callbackUrl';
       expect(
-        daraja.configureLipaNaMPesa(passkey, callbackUrl).config.lipaNaMPesa
+        daraja.configureMPesaExpress(passkey, callbackUrl).config.lipaNaMPesa
       ).to.deep.equal({ passkey, callbackUrl });
     });
   });
