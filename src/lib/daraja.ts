@@ -1,9 +1,11 @@
+import { API_URLS } from './api-urls';
 import { IDarajaConfig } from './config.interface';
 import { DarajaConfigError } from './errors';
+import { MPesa } from './mpesa';
 
 export class Daraja {
-  private config: IDarajaConfig = {};
-  constructor() {}
+  private config: IDarajaConfig = { urls: API_URLS.sandbox };
+  constructor(private consumerKey: string, private consumerSecret: string) {}
 
   /**
    *
@@ -24,5 +26,14 @@ export class Daraja {
     }
     this.config = { ...this.config, lipaNaMPesa: { passkey, callbackUrl } };
     return this;
+  }
+
+  public build(environment: 'sandbox' | 'production' = 'sandbox') {
+    this.config = {
+      ...this.config,
+      urls:
+        environment === 'production' ? API_URLS.production : API_URLS.sandbox
+    };
+    return new MPesa(this.consumerKey, this.consumerSecret, this.config);
   }
 }
