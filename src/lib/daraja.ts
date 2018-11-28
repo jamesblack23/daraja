@@ -28,6 +28,14 @@ export class Daraja {
     return this;
   }
 
+  /**
+   *
+   * Create a configured MPesa instance
+   * @param {('sandbox' | 'production')} [environment='sandbox'] - the
+   * environment to run MPesa on
+   * @returns
+   * @memberof Daraja
+   */
   public build(environment: 'sandbox' | 'production' = 'sandbox') {
     this.config = {
       ...this.config,
