@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "test": "npm run build && nyc mocha --ui tdd test/**/*.test.js",
+    "test": "npm run build && nyc mocha test/**/*.test.js",
     "coverage": "nyc report --reporter=text-lcov | coveralls",
     "build": "rimraf dist && tsc",
     "prepare": "npm run build",
@@ -38,7 +38,7 @@
     "istanbul": "^0.4.5",
     "mocha": "^5.2.0",
     "nyc": "^13.1.0",
-    "sinon": "^7.1.1",
+    "prettier": "^1.15.2",
     "tslint": "^5.11.0",
     "typescript": "^3.1.6"
   },
