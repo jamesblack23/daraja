@@ -2,17 +2,97 @@ import { IDarajaConfig } from './config.interface';
 
 import * as moment from 'moment';
 import * as request from 'request-promise-native';
-import { MPesaAPIError } from './errors';
+import { DarajaAPIError, DarajaConfigError, MPesaExpressError } from './errors';
 
+/**
+ *
+ * Class implementing the MPesa API methods. Should only be instantiated using
+ * the Daraja class' build() method.
+ * @export
+ * @class MPesa
+ */
 export class MPesa {
   private tokenExpiry = moment();
   private accessToken = '';
+  private request = request.defaults({ json: true });
 
   constructor(
+    private shortcode: number,
     private consumerKey: string,
     private consumerSecret: string,
     private config: IDarajaConfig
   ) {}
+
+  /**
+   *
+   * Initiates an online payment on behalf of a customer.
+   * @param {number} amount - money that the customer pays to the Shorcode
+   * @param {number} sender - phone number sending money
+   * @param {number} recipient - organization receiving the funds
+   * @param {('CustomerPayBillOnline' | 'CustomerBuyGoodsOnline')} transactionType -
+   * transaction type that is used to identify the transaction when sending the
+   * request to M-Pesa
+   * @param {string} accountReference - alpha-Numeric parameter that is defined
+   * by your system as an Identifier of the transaction for
+   * CustomerPayBillOnline transaction type
+   * @param {string} transactionDescription - any additional
+   * information/comment that can be sent along with the request from your
+   * system
+   * @returns {Promise<string>}
+   * @memberof MPesa
+   */
+  public async mPesaExpressRequest(
+    amount: number,
+    sender: number,
+    recipient: number,
+    transactionType: 'CustomerPayBillOnline' | 'CustomerBuyGoodsOnline',
+    accountReference: string,
+    transactionDescription: string
+  ): Promise<string> {
+    if (!this.config.mPesaExpress) {
+      throw new DarajaConfigError('Missing mPesaExpress configuration');
+    }
+    if (arguments.length !== this.mPesaExpressRequest.length) {
+      throw new MPesaExpressError(
+        `Expected ${this.mPesaExpressRequest.length} arguments but got ${
+          arguments.length
+        }`
+      );
+    }
+    try {
+      const timestamp = moment().format('YYYYMMDDHHmmss');
+      const { CheckoutRequestID } = await this.request.post(
+        this.config.urls.mPesaExpress.request,
+        {
+          body: {
+            AccountReference: accountReference,
+            Amount: amount,
+            BusinessShortCode: this.shortcode,
+            CallBackURL: this.config.mPesaExpress.callbackUrl,
+            PartyA: sender,
+            PartyB: recipient,
+            Password: Buffer.from(
+              `${this.shortcode}${this.config.mPesaExpress.passkey}${timestamp}`
+            ).toString('base64'),
+            PhoneNumber: sender,
+            Timestamp: timestamp,
+            TransactionDesc: transactionDescription,
+            TransactionType: transactionType
+          },
+          headers: { Authorization: `Bearer ${await this.generateToken()}` }
+        }
+      );
+      return CheckoutRequestID;
+    } catch (error) {
+      const {
+        response: {
+          body: { errorMessage: message }
+        }
+      } = error;
+      throw new DarajaAPIError(message);
+    }
+  }
+
   private async generateToken(): Promise<string> {
     try {
       if (moment().isBefore(this.tokenExpiry.subtract(1, 'minute'))) {
@@ -33,7 +113,7 @@ export class MPesa {
       const {
         response: { statusMessage: message }
       } = error;
-      throw new MPesaAPIError(message);
+      throw new DarajaAPIError(message);
     }
   }
 }

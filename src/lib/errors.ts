@@ -4,9 +4,15 @@ export class DarajaConfigError extends Error {
     this.name = 'DarajaConfigError';
   }
 }
-export class MPesaAPIError extends Error {
+export class DarajaAPIError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = 'MPesaAPIError';
+    this.name = 'DarajaAPIError';
+  }
+}
+export class MPesaExpressError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'MPesaExpressError';
   }
 }

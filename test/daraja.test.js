@@ -29,7 +29,7 @@ describe('Daraja', () => {
       const passkey = 'passkey';
       const callbackUrl = 'callbackUrl';
       expect(
-        daraja.configureMPesaExpress(passkey, callbackUrl).config.lipaNaMPesa
+        daraja.configureMPesaExpress(passkey, callbackUrl).config.mPesaExpress
       ).to.deep.equal({ passkey, callbackUrl });
     });
   });
