@@ -79,10 +79,11 @@ simplify the integration even further and capture all common use cases.
    operating system.
 
    ```sh
-   $ node --version
-   v10.14.0
-   $ npm --version
-   6.4.1
+   node --version
+   ```
+
+   ```sh
+   npm --version
    ```
 
 2. Open a command line and navigate to your project folder. Run the following
@@ -98,4 +99,4 @@ Visit the [documentation](https://austinewuncler.github.io/daraja)
 
 ## License
 
-MIT
+This project is licensed under the [MIT](LICENCE) License.
