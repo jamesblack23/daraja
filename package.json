@@ -1,6 +1,6 @@
 {
   "name": "daraja",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "A NodeJS library to simplify integration with Safaricom's Daraja M-Pesa API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
