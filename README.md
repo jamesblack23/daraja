@@ -1,211 +1,100 @@
-![Daraja Logo](/img/daraja.png)
+![Daraja Logo](img/daraja.png)
 
-[![npm version](https://badge.fury.io/js/daraja.svg)](https://badge.fury.io/js/daraja)
-[![Build Status](https://travis-ci.com/austinewuncler/daraja.svg?branch=master)](https://travis-ci.com/austinewuncler/daraja)
-[![Coverage Status](https://coveralls.io/repos/github/austinewuncler/daraja/badge.svg?branch=master)](https://coveralls.io/github/austinewuncler/daraja?branch=master)
-[![dependencies Status](https://david-dm.org/austinewuncler/daraja/status.svg)](https://david-dm.org/austinewuncler/daraja)
-[![Known Vulnerabilities](https://snyk.io/test/github/austinewuncler/daraja/badge.svg)](https://snyk.io/test/github/austinewuncler/daraja)
+A NodeJS library to simplify integration with Safaricom's Daraja M-Pesa API
+
+![npm](https://img.shields.io/npm/v/daraja.svg?style=flat-square)
+![Travis (.com)](https://img.shields.io/travis/com/austinewuncler/daraja.svg?style=flat-square)
+![Coveralls github](https://img.shields.io/coveralls/github/austinewuncler/daraja.svg?style=flat-square)
+![Codacy grade](https://img.shields.io/codacy/grade/52f5703641404c969aa8d6c0d9f0616d.svg?style=flat-square)
+![Code Climate issues](https://img.shields.io/codeclimate/issues/austinewuncler/daraja.svg?style=flat-square)
+![Code Climate maintainability](https://img.shields.io/codeclimate/maintainability/austinewuncler/daraja.svg?style=flat-square)
+![David](https://img.shields.io/david/austinewuncler/daraja.svg?style=flat-square)
+![David](https://img.shields.io/david/dev/austinewuncler/daraja.svg?style=flat-square)
+![npm bundle size (minified)](https://img.shields.io/bundlephobia/min/daraja.svg?style=flat-square)
+![npm](https://img.shields.io/npm/dt/daraja.svg?style=flat-square)
+![GitHub](https://img.shields.io/github/license/austinewuncler/daraja.svg?style=flat-square)
 
 ## Example
 
 ```javascript
-const { DarajaBuilder } = require('daraja');
+const { Daraja } = require('daraja');
 
-const daraja = new DarajaBuilder(12345, 'consumerKey', 'consumerSecret')
-  .addLipaNaMpesaConfig('passkey', 'transactionType')
+// instantiate Daraja with the organization's shortcode and app's Consumer Key
+// and Consumer Secret
+const daraja = new Daraja([SHORTCODE], '[CONSUMER_KEY]', '[CONSUMER_SECRET]');
+
+// create an MPesa instance configured according to the API's you will consume
+// e.g to consume MPesa Express (Lipa Na M-Pesa Online) API
+const mpesa = daraja
+  .configureMPesaExpress('[PASSKEY]', '[CALLBACK_URL]')
   .build();
 
-daraja
-  .lipaNaMpesa(
-    100,
-    254712345678,
-    12345,
-    'http://mycallbackurl.com',
-    'AccountReference',
-    'TransactionDescription'
+// finally make the call to the API passing the required arguments
+mpesa
+  .mPesaExpressRequest(
+    [AMOUNT],
+    [SENDER],
+    [RECIPIENT],
+    '[TRANSACTION_TYPE]',
+    '[ACCOUNT_REFERENCE]',
+    '[TRANSACTION_DESCRIPTION]'
   )
-  .then(response => console.log(response))
-  .catch(error => console.log(error));
+  .then(response => {
+    // if the call was successfull, you can do something with the response here
+  })
+  .catch(error => {
+    // if any error occurs, you can handle it here
+  });
+
+// you can also use async-await to handle the response and errors
+try {
+  const response = await mpesa.mPesaExpressRequest(
+    [AMOUNT],
+    [SENDER],
+    [RECIPIENT],
+    '[TRANSACTION_TYPE]',
+    '[ACCOUNT_REFERENCE]',
+    '[TRANSACTION_DESCRIPTION]'
+  );
+  // handle the response here
+} catch (error) {
+  // handle any errors here
+}
 ```
 
-## API
+## Motivation
 
-The `DarajaBuilder` class is responsible for creating a properly configured
-`Daraja` instance.
+I developed this library to make it as painless as possible for JavaScript &
+TypeScript developers to integrate their web applications with Safaricom's
+Daraja M-Pesa API.
 
-```javascript
-const darajaBuilder = new DarajaBuilder(
-  shortcode,
-  consumerKey,
-  consumerSecret,
-  environment
-);
-```
+The emphasis is to make use of modern JavaScript & TypeScript syntax to provide
+a clean an easy to use interface.
+This library is under constant maintenance and more features will be added to
+simplify the integration even further and capture all common use cases.
 
-- `shortcode`: `number` (required) - the organization's shortcode (Paybill or
-  Buygoods - A 5 to 6 digit account number) used to identify an organization
-- `consumerKey`: `string` (required) - the App's Consumer Key
-- `consumerSecret`: `string` (required) - the App's Consumer Secret
-- `environment`: `string` (optional, defaults to `sandbox`) - the environment
-  Daraja will run on. Acceptable values are `sandbox` and `production`.
+## Installation
 
-The following chainable `DarajaBuilder` instance methods return a newly
-configured `DarajaBuilder` instance:
+1. Ensure you have [Node & npm](https://nodejs.org) installed for your
+   operating system.
 
-- `addLipaNaMpesaConfig(passkey, transactionType)` - Adds Lipa na M-Pesa to the
-  configuration.
+   ```sh
+   $ node --version
+   v10.14.0
+   $ npm --version
+   6.4.1
+   ```
 
-  - `passkey`: `string` (required for Lipa Na M-Pesa Online transactions) -
-    the app's Lipa Na M-Pesa Online Passkey.
-  - `transactionType`: `('CustomerPayBillOnline' | 'CustomerBuyGoodsOnline')`
-    (optional, defaults to `CustomerPayBillOnline`) - the transaction type that
-    is used to identify the transaction when sending the request to M-Pesa
+2. Open a command line and navigate to your project folder. Run the following
+   command to install `daraja` as a project dependency
 
-- `addB2CConfig(initiatorName, initiatorPassword)` - Adds B2C to the
-  configuration
-  - `initiatorName`: `string` (required) - username of the M-Pesa B2C account
-    API operator
-  - `initiatorPassword`: `string` (required) - password of the M-Pesa B2C
-    account API operator
+   ```sh
+   npm install --save daraja
+   ```
 
-After chaining all the configuration methods, you need to call `build()` to get
-the configured `Daraja` instance
+## API Reference
 
-### Lipa Na M-Pesa
-
-```javascript
-const daraja = darajaBuilder
-  .addLipaNaMpesaConfig(passkey, transactionType)
-  .build();
-```
-
-#### Lipa Na M-Pesa Online Request
-
-Initiate an online payment on behalf of a customer. Activates an STK push to
-the customer prompting them to enter their correct M-Pesa PIN to complete the
-transaction.
-
-```javascript
-daraja.lipaNaMpesaRequest(
-  amount,
-  sender,
-  recipient,
-  callbackUrl,
-  accountReference,
-  transactionDescription
-);
-```
-
-- `amount`: `number` (required) - the Amount to be transacted
-- `sender`: `number` (required) - the phone number sending money. The parameter
-  expected is a Valid Safaricom Mobile Number that is M-Pesa registered in the
-  format 2547XXXXXXXX
-- `recipient`: `number` (required) - the PayBill or Till Number for the
-  organization receiving the funds.
-- `callbackUrl`: `string` (required) - a valid endpoint to which the results
-  will be sent by M-Pesa API via POST request
-- `accountReference`: `string` (required) - an Alpha-Numeric parameter that is
-  defined by your system as an Identifier
-- `transactionDescription`: `string` (required) - any additional
-  information/comment that can be sent along with the request from your system.
-  Maximum of 13 Characters
-
-Returns a `Promise<string>` that resolves to the transaction's
-`CheckoutRequestID` or throws `MpesaError`
-
-### C2B
-
-```javascript
-const daraja = darajaBuilder.build();
-```
-
-#### Register URLs
-
-Register validation and confirmation URLs on M-Pesa
-
-```javascript
-daraja.c2bRegisterURLs(validationURL, confirmationURL, responseType);
-```
-
-- `validationUrl`: `string` (required) - the URL that receives the validation
-  request from M-Pesa API upon payment submission
-- `confirmationUrl`: `string` (required) - the URL that receives the
-  confirmation request from M-Pesa API upon payment completion
-- `responseType`: `('Canceled' | 'Completed')`
-  (optional, defaults to `Completed`) - specifies what is to happen if for any
-  reason the validation URL is not reachable.
-
-Returns a `Promise<string>` that resolves to the `ResponseDescription` or
-throws `MpesaError`
-
-#### Simulate C2B Transaction
-
-Simulate a payment made from the client phone's STK/SIM Toolkit menu
-
-```javascript
-daraja.c2bSimulateTransaction(amount, sender, billReferenceNumber);
-```
-
-- `amount`: `number` (required) - the amount being transacted
-- `sender`: `number` (required) - the phone number initiating the C2B
-  transaction
-- `billReferenceNumber`: `string` (required) - a unique bill identifier, e.g an
-  Account Number
-
-Returns a `Promise<string>` that resolves to the `ResponseDescription` or
-throws `MpesaError`
-
-### B2C
-
-```javascript
-const daraja = darajaBuilder
-  .addB2CConfig(initiatorName, initiatorPassword)
-  .build();
-```
-
-#### B2C Payment Request
-
-Transact between an M-Pesa short code to a phone number registered on M-Pesa
-
-```javascript
-daraja.b2cPaymentRequest(
-  amount,
-  recipient,
-  commandID,
-  resultUrl,
-  timeoutUrl,
-  remarks,
-  occassion
-);
-```
-
-- `amount`: `number` (required) - the amount of money being sent to the
-  customer
-- `recipient`: `number` (required) - the customer mobile number to receive the
-  amount
-- `commandID`: `('SalaryPayment' | 'BusinessPayment' | 'PromotionPayment')`
-  (required) - a unique command that specifies B2C transaction type
-- `resultUrl`: `string` (required) - the URL to be specified in your request
-  that will be used by M-Pesa to send notification upon processing of the
-  payment request
-- `timeoutUrl`: `string` (required) - the URL to be specified in your request
-  that will be used by API Proxy to send notification incase the payment
-  request is timed out while awaiting processing in the queue
-- `remarks`: `remarks` (required) - any additional information to be associated
-  with the transaction
-- `occassion`: `string` (required) - any additional information to be
-  associated with the transaction
-
-Returns a `Promise<string>` that resolves to the `ResponseDescription` or
-throws `MpesaError`
-
-## Install
-
-With [Node](https://nodejs.org/en/) & [npm](https://npmjs.org/) installed, run
-
-```sh
-npm install daraja
-```
+Visit the [documentation](https://austinewuncler.github.io/daraja)
 
 ## License
 

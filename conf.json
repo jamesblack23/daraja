@@ -1,0 +1,16 @@
+{
+  "opts": {
+    "destination": "./docs",
+    "readme": "./README.md",
+    "recurse": true,
+    "tutorials": "./tutorials"
+  },
+  "source": { "include": ["./dist"] },
+  "templates": {
+    "default": {
+      "includeDate": false,
+      "outputSourceFiles": false,
+      "staticFiles": { "include": ["./img"] }
+    }
+  }
+}

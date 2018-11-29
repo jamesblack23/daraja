@@ -3,7 +3,11 @@ node_js:
   - 'lts/*'
 cache:
   - 'node_modules'
+
+# safelist
 branches:
   only:
+    - release
     - master
+    - stable
 after_success: npm run coverage
