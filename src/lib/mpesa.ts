@@ -5,8 +5,9 @@ import * as request from 'request-promise-native';
 import { DarajaAPIError, DarajaConfigError, MPesaExpressError } from './errors';
 
 /**
- * Class implementing the MPesa API methods. Should only be instantiated using
- * the {@link Daraja} class' [build]{@link Daraja#build} method.
+ * This class implements the MPesa API methods. Should only be instantiated
+ * using a {@link Daraja} instance.
+ * @see [Daraja.build()]{@link Daraja#build}
  */
 export class MPesa {
   private tokenExpiry = moment();
@@ -18,7 +19,8 @@ export class MPesa {
    * @param {number} shortcode - organization shortcode
    * @param {string} consumerKey - app's ConsumerKey
    * @param {string} consumerSecret - app's ConsumerSecret
-   * @param {IDarajaConfig} config
+   * @param {IDarajaConfig} config - a configuration object with persistent
+   * values to be used in Daraja API calls
    * @memberof MPesa
    * @hideconstructor
    */
@@ -31,7 +33,8 @@ export class MPesa {
 
   /**
    *
-   * Initiates an online payment on behalf of a customer.
+   * This method invokes the Lipa Na M-Pesa Online Payment API. Use this method
+   * to initiate an online payment on behalf of a customer.
    * @param {number} amount - money that the customer pays to the Shorcode
    * @param {number} sender - phone number sending money
    * @param {number} recipient - organization receiving the funds
@@ -44,11 +47,13 @@ export class MPesa {
    * @param {string} transactionDescription - any additional
    * information/comment that can be sent along with the request from your
    * system
-   * @returns {Promise<string>} CheckoutRequestID
-   * @throws {DarajaConfigError} A required value is missing in the
-   * configuration
-   * @throws {MPesaExpressError} Invalid arguments have been passed
-   * @throws {DarajaAPIError} The Daraja API cannot process the request
+   * @returns {Promise<string>} CheckoutRequestID -
+   * This is a global unique identifier of the processed checkout transaction
+   * request.
+   * @throws {DarajaConfigError} When mPesaExpress has not been configured.
+   * @see [Daraja.configureMPesaExpress()]{@link Daraja#configureMPesaExpress}
+   * @throws {MPesaExpressError} When an invalid arguments have been passed.
+   * @throws {DarajaAPIError} When the Daraja API cannot process the request.
    * @memberof MPesa
    * @async
    */

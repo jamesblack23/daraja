@@ -3,7 +3,10 @@ import { IDarajaConfig } from './config.interface';
 import { DarajaConfigError } from './errors';
 import { MPesa } from './mpesa';
 
-/** Class that configures and creates an {@link MPesa} instance. */
+/**
+ * This class contains methods that set values that should persist across
+ * multiple Daraja API calls.
+ */
 export class Daraja {
   private config: IDarajaConfig = { urls: API_URLS.sandbox };
 
@@ -26,9 +29,10 @@ export class Daraja {
    * @param {string} passkey - Lipa Na MPesa Online Passkey
    * @param {string} callbackUrl - valid secure URL that is used to receive
    * notifications from M-Pesa API
-   * @returns {Daraja} the Daraja instance with the MPesaExpress configuration
-   * added
-   * @throws {DarajaConfigError}
+   * @returns {Daraja} The Daraja instance with the passkey and MPesa Express
+   * callbackUrl added to the configuration
+   * @throws {DarajaConfigError} If the passkey or callbackUrl arguments are
+   * missing.
    * @memberof Daraja
    */
   public configureMPesaExpress(passkey: string, callbackUrl: string): Daraja {
@@ -45,7 +49,8 @@ export class Daraja {
 
   /**
    *
-   * Creates a configured {@link MPesa} instance
+   * Creates an {@link MPesa} instance set up to perform API calls that have
+   * been configured.
    * @param {('sandbox' | 'production')} [environment='sandbox'] - MPesa API
    * environment
    * @returns {MPesa}
