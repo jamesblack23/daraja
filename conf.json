@@ -1,9 +1,9 @@
 {
   "opts": {
     "destination": "./docs",
-    "readme": "./README.md",
+    "readme": "./jsdoc/README.md",
     "recurse": true,
-    "tutorials": "./tutorials"
+    "tutorials": "tutorials"
   },
   "source": { "include": ["./dist"] },
   "templates": {
