@@ -6,7 +6,7 @@ import { DarajaAPIError, DarajaConfigError, MPesaExpressError } from './errors';
 
 /**
  * Class implementing the MPesa API methods. Should only be instantiated using
- * the Daraja class' build() method.
+ * the {@link Daraja} class' [build]{@link Daraja#build} method.
  */
 export class MPesa {
   private tokenExpiry = moment();
@@ -50,6 +50,7 @@ export class MPesa {
    * @throws {MPesaExpressError} Invalid arguments have been passed
    * @throws {DarajaAPIError} The Daraja API cannot process the request
    * @memberof MPesa
+   * @async
    */
   public async mPesaExpressRequest(
     amount: number,

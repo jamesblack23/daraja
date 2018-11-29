@@ -6,6 +6,12 @@
  * @extends {Error}
  */
 export class DarajaConfigError extends Error {
+  /**
+   * Creates an instance of DarajaConfigError.
+   * @param {string} message
+   * @memberof DarajaConfigError
+   * @private
+   */
   constructor(message: string) {
     super(message);
     this.name = 'DarajaConfigError';
