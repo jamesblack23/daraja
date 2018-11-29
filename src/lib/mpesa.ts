@@ -5,17 +5,23 @@ import * as request from 'request-promise-native';
 import { DarajaAPIError, DarajaConfigError, MPesaExpressError } from './errors';
 
 /**
- *
  * Class implementing the MPesa API methods. Should only be instantiated using
  * the Daraja class' build() method.
- * @export
- * @class MPesa
  */
 export class MPesa {
   private tokenExpiry = moment();
   private accessToken = '';
   private request = request.defaults({ json: true });
 
+  /**
+   * Creates an instance of MPesa.
+   * @param {number} shortcode - organization shortcode
+   * @param {string} consumerKey - app's ConsumerKey
+   * @param {string} consumerSecret - app's ConsumerSecret
+   * @param {IDarajaConfig} config
+   * @memberof MPesa
+   * @hideconstructor
+   */
   constructor(
     private shortcode: number,
     private consumerKey: string,
@@ -38,7 +44,11 @@ export class MPesa {
    * @param {string} transactionDescription - any additional
    * information/comment that can be sent along with the request from your
    * system
-   * @returns {Promise<string>}
+   * @returns {Promise<string>} CheckoutRequestID
+   * @throws {DarajaConfigError} A required value is missing in the
+   * configuration
+   * @throws {MPesaExpressError} Invalid arguments have been passed
+   * @throws {DarajaAPIError} The Daraja API cannot process the request
    * @memberof MPesa
    */
   public async mPesaExpressRequest(
@@ -93,6 +103,13 @@ export class MPesa {
     }
   }
 
+  /**
+   *
+   *
+   * @private
+   * @returns {Promise<string>}
+   * @memberof MPesa
+   */
   private async generateToken(): Promise<string> {
     try {
       if (moment().isBefore(this.tokenExpiry.subtract(1, 'minute'))) {
