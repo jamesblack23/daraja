@@ -17,44 +17,44 @@ A NodeJS library to simplify integration with Safaricom's Daraja M-Pesa API
 ## Example
 
 ```javascript
-const { Daraja } = require('daraja');
+const { Mpesa } = require('daraja');
 
-// instantiate Daraja with the organization's shortcode and app's Consumer Key
+// instantiate Mpesa with the organization's shortcode and app's Consumer Key
 // and Consumer Secret
-const daraja = new Daraja([SHORTCODE], '[CONSUMER_KEY]', '[CONSUMER_SECRET]');
+const mpesa = new Mpesa(123456, 'yourConsumerKey', 'yourConsumerSecret');
 
-// create an MPesa instance configured according to the API's you will consume
-// e.g to consume MPesa Express (Lipa Na M-Pesa Online) API
-const mpesa = daraja
-  .configureMPesaExpress('[PASSKEY]', '[CALLBACK_URL]')
-  .build();
-
-// finally make the call to the API passing the required arguments
+// then make the call to the API passing the required arguments
 mpesa
-  .mPesaExpressRequest(
-    [AMOUNT],
-    [SENDER],
-    [RECIPIENT],
-    '[TRANSACTION_TYPE]',
-    '[ACCOUNT_REFERENCE]',
-    '[TRANSACTION_DESCRIPTION]'
+  .mpesaExpressRequest(
+    100,
+    254712345678,
+    123456,
+    'bfb279f9aa9bdbcf15...',
+    'CustomerPayBillOnline',
+    'INV001',
+    'Regular payment',
+    'http://callbackurl.com'
   )
   .then(response => {
-    // if the call was successfull, you can do something with the response here
+    // SUCCESS
+    // do something with the response
   })
   .catch(error => {
-    // if any error occurs, you can handle it here
+    // FAILED
+    // handle the error
   });
 
 // you can also use async-await to handle the response and errors
 try {
-  const response = await mpesa.mPesaExpressRequest(
-    [AMOUNT],
-    [SENDER],
-    [RECIPIENT],
-    '[TRANSACTION_TYPE]',
-    '[ACCOUNT_REFERENCE]',
-    '[TRANSACTION_DESCRIPTION]'
+  const response = await mpesa.mpesaExpressRequest(
+    100,
+    254712345678,
+    123456,
+    'bfb279f9aa9bdbcf15...',
+    'CustomerPayBillOnline',
+    'INV001',
+    'Regular payment',
+    'http://callbackurl.com'
   );
   // handle the response here
 } catch (error) {
