@@ -10,9 +10,10 @@
     "jsdoc": "rimraf ./docs && npm run build && jsdoc -c ./conf.json",
     "format": "prettier --write ./dist/**/*",
     "postversion": "git push && git push --tags",
-    "prepare": "npm run build && npm run jsdoc",
+    "prepare": "npm run snyk-protect; npm run build && npm run jsdoc",
     "test": "npm run build && nyc mocha test/**/*.test.js",
-    "version": "git add -A src"
+    "version": "git add -A src",
+    "snyk-protect": "snyk protect"
   },
   "repository": {
     "type": "git",
@@ -49,6 +50,8 @@
   "dependencies": {
     "moment": "^2.23.0",
     "request": "^2.88.0",
-    "request-promise-native": "^1.0.5"
-  }
+    "request-promise-native": "^1.0.5",
+    "snyk": "^1.189.0"
+  },
+  "snyk": true
 }
